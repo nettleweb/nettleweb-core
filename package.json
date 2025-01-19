@@ -1,0 +1,36 @@
+{
+	"name": "@nettleweb/core",
+	"author": "NettleWeb <support@nettleweb.com> (https://nettleweb.com/)",
+	"license": "MIT",
+	"version": "0.0.1",
+	"homepage": "https://github.com/nettleweb/nettleweb-core",
+	"description": "The core JavaScript support framework used by NettleWeb projects.",
+	"main": "main.js",
+	"type": "module",
+	"types": "./types/types.d.ts",
+	"files": [
+		"/out/",
+		"/types/",
+		"bin.js",
+		"main.js",
+		"package.json"
+	],
+	"bugs": {
+		"url": "https://github.com/nettleweb/nettleweb-core/issues",
+		"email": "support@nettleweb.com"
+	},
+	"engines": {
+		"node": ">=18.17.1",
+		"vscode": "^1.22.0"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/nettleweb/nettleweb-core.git"
+	},
+	"devDependencies": {
+		"typescript": "^5.7.3"
+	},
+	"scripts": {
+		"build": "./scripts/build.sh"
+	}
+}
