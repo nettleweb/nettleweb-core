@@ -1,10 +1,11 @@
+import { UTF_8 } from "../coder/Charset.js";
 export default function cyrb128(data) {
+    const msg = Array.from(typeof data === "string" ? UTF_8.encode(data) : data);
     let h1 = 1779033703;
     let h2 = 3144134277;
     let h3 = 1013904242;
     let h4 = 2773480762;
-    for (let i = 0; i < data.length; i++) {
-        let k = data.charCodeAt(i);
+    for (const k of msg) {
         h1 = h2 ^ Math.imul(h1 ^ k, 597399067);
         h2 = h3 ^ Math.imul(h2 ^ k, 2869860233);
         h3 = h4 ^ Math.imul(h3 ^ k, 951274213);
@@ -14,9 +15,10 @@ export default function cyrb128(data) {
     h2 = Math.imul(h4 ^ (h2 >>> 22), 2869860233);
     h3 = Math.imul(h1 ^ (h3 >>> 17), 951274213);
     h4 = Math.imul(h2 ^ (h4 >>> 19), 2716044179);
-    h1 ^= (h2 ^ h3 ^ h4);
-    h2 ^= h1;
-    h3 ^= h1;
-    h4 ^= h1;
-    return [h1 >>> 0, h2 >>> 0, h3 >>> 0, h4 >>> 0];
+    return [
+        (h1 ^= (h2 ^ h3 ^ h4)) >>> 0,
+        (h2 ^ h1) >>> 0,
+        (h3 ^ h1) >>> 0,
+        (h4 ^ h1) >>> 0
+    ];
 }

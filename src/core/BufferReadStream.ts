@@ -1,8 +1,21 @@
-import ReadStream from "./ReadStream.js";
+import SyncReadStream from "./SyncReadStream.js";
 
-export default class BufferReadStream extends ReadStream implements NettleWeb.BufferReadStream {
+export default class BufferReadStream extends SyncReadStream implements NettleWeb.BufferReadStream {
 	#index: number;
 	#buffer: NettleWeb.Buffer;
+
+	get index(): number {
+		return this.#index;
+	}
+	set index(v: number) {
+		this.#index = v || 0;
+	}
+	get buffer(): NettleWeb.Buffer {
+		return this.#buffer;
+	}
+	set buffer(v: NettleWeb.Buffer) {
+		this.#buffer = v;
+	}
 
 	constructor(buf: NettleWeb.Buffer, i?: number | nul) {
 		super();
@@ -14,22 +27,18 @@ export default class BufferReadStream extends ReadStream implements NettleWeb.Bu
 		return this.#buffer[this.#index++];
 	}
 
-	readBuf(buf: NettleWeb.Buffer): number {
-		const buffer = this.#buffer.subarray(this.#index, this.#index += buf.byteLength);
-		buf.set(buffer, 0);
-		return buffer.byteLength;
+	readBuf(buf: NettleWeb.Buffer, off?: number | nul, len?: number | nul): number {
+		const buffer = this.#buffer.subarray(this.#index, this.#index += (len ||= buf.byteLength));
+		buf.set(buffer, off || 0);
+		return len;
 	}
 
 	readNBytes(n: number): NettleWeb.Buffer {
 		return this.#buffer.subarray(this.#index, this.#index += n);
 	}
 
-	setIndex(i: number) {
-		this.#index = i;
-	}
-
-	setBuffer(buf: NettleWeb.Buffer) {
-		this.#buffer = buf;
+	readAllBytes(): NettleWeb.Buffer {
+		return this.#buffer.subarray(this.#index);
 	}
 
 	// buffer read stream cannot be closed

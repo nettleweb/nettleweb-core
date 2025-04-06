@@ -1,8 +1,12 @@
 import Null from "../misc/Null.js";
 export default class Stream extends Null {
+    #sync;
     #read;
     #write;
-    #closed;
+    #closed = false;
+    get sync() {
+        return this.#sync;
+    }
     get closed() {
         return this.#closed;
     }
@@ -12,11 +16,14 @@ export default class Stream extends Null {
     get canWrite() {
         return this.#write;
     }
-    constructor(read, write) {
+    constructor(sync, read, write) {
         super();
+        this.#sync = sync ?? false;
         this.#read = read ?? false;
         this.#write = write ?? false;
-        this.#closed = false;
+    }
+    clone() {
+        throw new Error("Function not implemented");
     }
     close() {
         this.#closed = true;

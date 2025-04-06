@@ -28,7 +28,7 @@
 		"url": "git+https://github.com/nettleweb/nettleweb-core.git"
 	},
 	"devDependencies": {
-		"typescript": "^5.7.3"
+		"typescript": "^5.8.2"
 	},
 	"scripts": {
 		"build": "./scripts/build.sh"

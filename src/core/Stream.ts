@@ -1,10 +1,14 @@
 import Null from "../misc/Null.js";
 
 export default class Stream extends Null implements NettleWeb.Stream {
+	#sync: boolean;
 	#read: boolean;
 	#write: boolean;
-	#closed: boolean;
+	#closed: boolean = false;
 
+	get sync(): boolean {
+		return this.#sync;
+	}
 	get closed(): boolean {
 		return this.#closed;
 	}
@@ -15,14 +19,18 @@ export default class Stream extends Null implements NettleWeb.Stream {
 		return this.#write;
 	}
 
-	constructor(read?: boolean | nul, write?: boolean | nul) {
+	constructor(sync?: boolean | nul, read?: boolean | nul, write?: boolean | nul) {
 		super();
+		this.#sync = sync ?? false;
 		this.#read = read ?? false;
 		this.#write = write ?? false;
-		this.#closed = false;
 	}
 
-	close() {
+	clone(): NettleWeb.Stream {
+		throw new Error("Function not implemented");
+	}
+
+	close(): Awaitable<void> {
 		this.#closed = true;
 	}
 }

@@ -1,21 +1,15 @@
 import Null from "../misc/Null.js";
-import RandomStream from "./RandomStream.js";
 
 export default class AbstractRandom<S> extends Null implements NettleWeb.Random<S> {
 	#seed: S | null;
 	get seed(): S | null { return this.#seed; }
 
-	static [Symbol.hasInstance](e: any): boolean {
-		try {
-			e.#seed;
-			return true;
-		} catch(err) {
-			return false;
-		}
-	}
-
 	constructor(seed?: S | nul) {
 		super();
+		this.#seed = seed || null;
+	}
+
+	setSeed(seed: S) {
 		this.#seed = seed || null;
 	}
 
@@ -23,23 +17,44 @@ export default class AbstractRandom<S> extends Null implements NettleWeb.Random<
 		throw new Error("Function not implemented");
 	}
 
-	randbuf(buffer: NettleWeb.Buffer): NettleWeb.Buffer {
-		const length = buffer.byteLength;
-		for (let i = 0; i < length; i++)
-			buffer[i] = Math.floor(this.rand() * 256) & 0xff;
+	randBuf(buf: NettleWeb.Buffer): NettleWeb.Buffer {
+		const len = buf.byteLength;
+		const rlen = len % 4;
+		const llen = len - rlen;
 
-		return buffer;
+		for (let i = 0; i < llen;) {
+			const rand = (this.rand() * 4294967296) >>> 0;
+			buf[i++] = rand & 0xff;
+			buf[i++] = (rand >> 8) & 0xff;
+			buf[i++] = (rand >> 16) & 0xff;
+			buf[i++] = (rand >> 24) & 0xff;
+		}
+
+		for (let i = llen; i < len; i++)
+			buf[i++] = (this.rand() * 256) & 0xff;
+
+		return buf;
 	}
 
-	randint(max?: number | nul, min?: number | nul): number {
-		return (min ||= 0) + Math.floor(this.rand() * ((max || 0xffff_ffff) - min));
+	randInt(max?: number | nul, min?: number | nul): number {
+		return (min ||= 0) + Math.floor(this.rand() * ((max || 4294967296) - min));
 	}
 
-	setSeed(seed: S) {
-		this.#seed = seed || null;
-	}
+	randUUID(): string {
+		const buf = this.randBuf(new Uint8Array(16));
 
-	createStream(): NettleWeb.ReadStream {
-		return new RandomStream(this);
+		// Set the version (4) and variant (8, 9, A, or B) bits
+		buf[6] = (buf[6] & 0x0f) | 0x40;
+		buf[8] = (buf[8] & 0x3f) | 0x80;
+
+		// Convert to string with hyphens
+		let uuid: string = "";
+		for (let i = 0; i < 16; i++) {
+			uuid += buf[i].toString(16).padStart(2, "0");
+			if (i === 3 || i === 5 || i === 7 || i === 9)
+				uuid += "-";
+		}
+
+		return uuid;
 	}
 }

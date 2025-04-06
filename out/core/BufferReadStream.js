@@ -1,7 +1,19 @@
-import ReadStream from "./ReadStream.js";
-export default class BufferReadStream extends ReadStream {
+import SyncReadStream from "./SyncReadStream.js";
+export default class BufferReadStream extends SyncReadStream {
     #index;
     #buffer;
+    get index() {
+        return this.#index;
+    }
+    set index(v) {
+        this.#index = v || 0;
+    }
+    get buffer() {
+        return this.#buffer;
+    }
+    set buffer(v) {
+        this.#buffer = v;
+    }
     constructor(buf, i) {
         super();
         this.#index = i || 0;
@@ -10,19 +22,16 @@ export default class BufferReadStream extends ReadStream {
     read() {
         return this.#buffer[this.#index++];
     }
-    readBuf(buf) {
-        const buffer = this.#buffer.subarray(this.#index, this.#index += buf.byteLength);
-        buf.set(buffer, 0);
-        return buffer.byteLength;
+    readBuf(buf, off, len) {
+        const buffer = this.#buffer.subarray(this.#index, this.#index += (len ||= buf.byteLength));
+        buf.set(buffer, off || 0);
+        return len;
     }
     readNBytes(n) {
         return this.#buffer.subarray(this.#index, this.#index += n);
     }
-    setIndex(i) {
-        this.#index = i;
-    }
-    setBuffer(buf) {
-        this.#buffer = buf;
+    readAllBytes() {
+        return this.#buffer.subarray(this.#index);
     }
     // buffer read stream cannot be closed
     get closed() { return false; }

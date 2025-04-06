@@ -3,11 +3,15 @@
 declare global {
 	export type nul = null | undefined | void;
 	export type Awaitable<T> = T | PromiseLike<T>;
-	export type NettleWeb = typeof NettleWeb & nul;
-	export type globalThis = typeof globalThis & nul;
+	export type NettleWeb = typeof NettleWeb & { readonly NettleWeb: NettleWeb; };
+	export type globalThis = typeof globalThis & { readonly NettleWeb: NettleWeb };
 
 	export module NettleWeb {
 		export const NettleWeb: NettleWeb;
+
+		export function loadModule(name: string, module: any): void;
+		export function unloadModule(name: string): boolean;
+		export function activeModules(): string[];
 
 		//////////////////////////////////////////////////////
 		// Null
@@ -44,11 +48,11 @@ declare global {
 		//////////////////////////////////////////////////////
 		export interface Random<Seed = number> {
 			readonly seed: Seed | null;
-			readonly rand: () => number;
-			readonly randbuf: (buf: Buffer) => Buffer;
-			readonly randint: (max?: number | nul, min?: number | nul) => number;
 			readonly setSeed: (seed: Seed) => void;
-			readonly createStream: () => ReadStream;
+			readonly rand: () => number;
+			readonly randBuf: (buf: Buffer) => Buffer;
+			readonly randInt: (max?: number | nul, min?: number | nul) => number;
+			readonly randUUID: () => string;
 		}
 		export const Random: {
 			new <S>(algorithm?: string | nul, seed?: S | nul): Random<S>;
@@ -68,54 +72,101 @@ declare global {
 		};
 
 		//////////////////////////////////////////////////////
-		// Streams
+		// Charset
 		//////////////////////////////////////////////////////
+		export interface Charset {
+			readonly name: string;
+			readonly encode: (data: string) => Buffer;
+			readonly decode: (data: Buffer) => string;
+		}
+		export const Charset: {
+			new(name: string): Charset;
+			readonly prototype: Charset;
+			readonly forName: (name: string) => Charset;
+			readonly isSupported: (name: string) => boolean;
+			readonly defaultCharset: () => Charset;
+		};
+
+		//////////////////////////////////////////////////////
+		// Streams
+		/////////////////////////////////////////////////////
 		export interface Stream {
+			readonly sync: boolean;
 			readonly closed: boolean;
 			readonly canRead: boolean;
 			readonly canWrite: boolean;
+			readonly clone: () => Awaitable<Stream>;
 			readonly close: () => Awaitable<void>;
 		}
 		export const Stream: {
-			new(canRead?: boolean | nul, canWrite?: boolean | nul): Stream;
+			new(sync?: boolean | nul, canRead?: boolean | nul, canWrite?: boolean | nul): Stream;
 			readonly prototype: Stream;
 		};
 
-		export interface ReadStream extends Stream {
+		/** @internal */
+		export interface ReadStreamBase extends Stream {
+			readonly pipe: (out: WriteStream) => Promise<number>;
+			readonly readBuf: (buf: Buffer, off?: number | nul, len?: number | nul) => Awaitable<number>;
+		}
+
+		export interface ReadStream extends ReadStreamBase {
 			readonly read: () => Awaitable<number>;
-			readonly readBuf: (buf: Buffer) => Awaitable<number>;
+			readonly readBuf: (buf: Buffer, off?: number | nul, len?: number | nul) => Awaitable<number>;
+			readonly readText: (len: number, charset?: string | nul) => Awaitable<string>;
 			readonly readNBytes: (n: number) => Awaitable<Buffer>;
+			readonly readAllBytes: () => Awaitable<Buffer>;
 		}
 		export const ReadStream: {
 			new(): ReadStream;
-			readonly prototype: Stream;
+			readonly prototype: ReadStream;
+		};
+
+		export interface SyncReadStream extends ReadStreamBase {
+			readonly read: () => number;
+			readonly readBuf: (buf: Buffer, off?: number | nul, len?: number | nul) => number;
+			readonly readText: (len: number, charset?: string | nul) => string;
+			readonly readNBytes: (n: number) => Buffer;
+			readonly readAllBytes: () => Buffer;
+			readonly pipeSync: (out: SyncWriteStream) => number;
+			readonly close: () => void;
+		}
+		export const SyncReadStream: {
+			new(): SyncReadStream;
+			readonly prototype: SyncReadStream;
 		};
 
 		export interface WriteStream extends Stream {
-			readonly write: (data: number | Buffer) => Awaitable<void>;
 			readonly flush: () => Awaitable<void>;
+			readonly write: (b: number) => Awaitable<void>;
+			readonly writeBuf: (buf: Buffer, off?: number | nul, len?: number | nul) => Awaitable<void>;
+			readonly writeText: (text: string, charset?: string | nul) => Awaitable<void>;
 		}
 		export const WriteStream: {
 			new(): WriteStream;
-			readonly prototype: Stream;
+			readonly prototype: WriteStream;
 		};
 
-		export interface BufferReadStream extends ReadStream {
-			readonly read: () => number;
-			readonly readBuf: (buf: Buffer) => number;
-			readonly readNBytes: (n: number) => Awaitable<Buffer>;
-			readonly setIndex: (i: number) => void;
-			readonly setBuffer: (buf: Buffer) => void;
+		export interface SyncWriteStream extends Stream {
+			readonly flush: () => void;
+			readonly write: (b: number) => void;
+			readonly writeBuf: (buf: Buffer, off?: number | nul, len?: number | nul) => void;
+			readonly writeText: (text: string, charset?: string | nul) => void;
+		}
+		export const SyncWriteStream: {
+			new(): SyncWriteStream;
+			readonly prototype: SyncWriteStream;
+		};
+
+		export interface BufferReadStream extends SyncReadStream {
+			index: number;
+			buffer: Buffer;
 		}
 		export const BufferReadStream: {
 			new(buf: Buffer, index?: number | nul): BufferReadStream;
 			readonly prototype: BufferReadStream;
 		};
 
-		export interface BufferWriteStream extends WriteStream {
-			readonly write: (data: number | Buffer) => void;
-			readonly flush: () => void;
-			readonly close: () => void;
+		export interface BufferWriteStream extends SyncWriteStream {
 			readonly toBuffer: () => Buffer;
 		}
 		export const BufferWriteStream: {
@@ -161,30 +212,12 @@ declare global {
 		//////////////////////////////////////////////////////
 		// String Coders
 		//////////////////////////////////////////////////////
-		export module ASCII {
-			export function encode(data: string): Buffer;
-			export function decode(data: Buffer): string;
-		}
-		export module UTF_8 {
-			export function encode(data: string): Buffer;
-			export function decode(data: Buffer): string;
-		}
-		export module UTF16BE {
-			export function encode(data: string): Buffer;
-			export function decode(data: Buffer): string;
-		}
-		export module UTF16LE {
-			export function encode(data: string): Buffer;
-			export function decode(data: Buffer): string;
-		}
-		export module UTF32BE {
-			export function encode(data: string): Buffer;
-			export function decode(data: Buffer): string;
-		}
-		export module UTF32LE {
-			export function encode(data: string): Buffer;
-			export function decode(data: Buffer): string;
-		}
+		export const ASCII: Charset;
+		export const UTF_8: Charset;
+		export const UTF16BE: Charset;
+		export const UTF16LE: Charset;
+		export const UTF32BE: Charset;
+		export const UTF32LE: Charset;
 
 		//////////////////////////////////////////////////////
 		// Binary Coders
@@ -213,9 +246,9 @@ declare global {
 		//////////////////////////////////////////////////////
 		// Utils
 		//////////////////////////////////////////////////////
-		export function md5(data: string): string;
-		export function sha256(data: string): string;
-		export function cyrb128(data: string): number[];
+		export function md5(data: string | Buffer): string;
+		export function sha256(data: string | Buffer): string;
+		export function cyrb128(data: string | Buffer): number[];
 	}
 }
 

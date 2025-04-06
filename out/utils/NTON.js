@@ -1,5 +1,5 @@
 /*! Simple NTON library based on https://github.com/ruochenjia/nton (MIT License) */
-import UTF_8 from "../coder/UTF_8.js";
+import { UTF_8 } from "../coder/Charset.js";
 import { isArrayBuffer } from "../misc/misc.js";
 const NTON = {
     encode: (value) => {

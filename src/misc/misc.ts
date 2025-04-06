@@ -15,7 +15,7 @@ export function isArrayBuffer(obj: any): obj is ArrayBuffer {
 }
 
 export function isBuffer(obj: any): obj is NettleWeb.Buffer {
-	return ArrayBuffer.isView(obj) && (obj as NettleWeb.Buffer)[Symbol.toStringTag] === "Uint8Array";
+	return ArrayBuffer.isView(obj) && (obj as Uint8Array)[Symbol.toStringTag] === "Uint8Array";
 }
 
 export function seedgen(): number {

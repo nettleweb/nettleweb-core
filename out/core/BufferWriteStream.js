@@ -1,5 +1,5 @@
-import WriteStream from "./WriteStream.js";
-export default class BufferWriteStream extends WriteStream {
+import SyncWriteStream from "./SyncWriteStream.js";
+export default class BufferWriteStream extends SyncWriteStream {
     #data = [];
     #length = 0;
     write(data) {

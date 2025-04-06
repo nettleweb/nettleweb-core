@@ -1,6 +1,6 @@
-import WriteStream from "./WriteStream.js";
+import SyncWriteStream from "./SyncWriteStream.js";
 
-export default class BufferWriteStream extends WriteStream implements NettleWeb.BufferWriteStream {
+export default class BufferWriteStream extends SyncWriteStream implements NettleWeb.BufferWriteStream {
 	#data: (NettleWeb.Buffer | number)[] = [];
 	#length: number = 0;
 

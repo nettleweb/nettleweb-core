@@ -11,17 +11,17 @@ const BufferProto = Object.freeze(Object.create(null, {
     }
 }));
 Object.defineProperty(Buffer, "from", {
-    value: (data) => {
+    value: (data, arg1) => {
         if (data == null || typeof data !== "object")
             throw new Error("Invalid buffer source");
         if (isBuffer(data))
-            return data;
+            return typeof arg1 === "function" ? data.map(arg1) : data;
         else if (isArrayBuffer(data))
             return new Uint8Array(data);
         else if (ArrayBuffer.isView(data))
             return new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
         else
-            return Uint8Array.from(data);
+            return Uint8Array.from(data, arg1);
     },
     writable: false,
     enumerable: false,
