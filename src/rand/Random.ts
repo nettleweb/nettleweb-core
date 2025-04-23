@@ -1,15 +1,14 @@
+import { STUB_FUNC } from "../misc/misc.js";
 import AbstractRandom from "./AbstractRandom.js";
 import { mulberry32, sfc32, splitmix32, xoshiro128 } from "./RandomImpl.js";
 
-(globalThis as any).A = AbstractRandom;
-
 export default class Random<S> extends AbstractRandom<S> implements NettleWeb.Random<S> {
-	static [Symbol.hasInstance](e: any): boolean {
-		return e instanceof AbstractRandom;
+	static [Symbol.hasInstance](w: any): boolean {
+		return w instanceof AbstractRandom;
 	}
 
 	constructor(algorithm?: string | nul, seed?: any) {
-		super(seed);
+		super();
 		if (new.target === Random) {
 			switch (algorithm || "mulberry32") {
 				case "sfc32":
@@ -25,4 +24,9 @@ export default class Random<S> extends AbstractRandom<S> implements NettleWeb.Ra
 			}
 		}
 	}
+
+	// stub implementation
+	seed = null;
+	rand() { return STUB_FUNC(); }
+	setSeed() { STUB_FUNC(); }
 }

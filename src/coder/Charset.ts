@@ -1,3 +1,4 @@
+import { STUB_FUNC } from "../misc/misc.js";
 import Null from "../misc/Null.js";
 
 export const ASCII: NettleWeb.Charset = {
@@ -262,11 +263,7 @@ export default class Charset extends Null implements NettleWeb.Charset {
 		return UTF_8; // always
 	}
 
-	encode(data: string): NettleWeb.Buffer {
-		throw new Error("Function not implemented");
-	}
-
-	decode(data: NettleWeb.Buffer): string {
-		throw new Error("Function not implemented");
-	}
+	// stub abstract functions
+	encode() { return STUB_FUNC(); }
+	decode() { return STUB_FUNC(); }
 }

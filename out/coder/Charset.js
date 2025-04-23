@@ -1,3 +1,4 @@
+import { STUB_FUNC } from "../misc/misc.js";
 import Null from "../misc/Null.js";
 export const ASCII = {
     name: "ascii",
@@ -216,10 +217,7 @@ export default class Charset extends Null {
     static defaultCharset() {
         return UTF_8; // always
     }
-    encode(data) {
-        throw new Error("Function not implemented");
-    }
-    decode(data) {
-        throw new Error("Function not implemented");
-    }
+    // stub abstract functions
+    encode() { return STUB_FUNC(); }
+    decode() { return STUB_FUNC(); }
 }

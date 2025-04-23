@@ -16,11 +16,11 @@ Object.defineProperty(Null, "prototype", {
 	enumerable: false,
 	configurable: false
 });
-Object.defineProperty(Null, Symbol.hasInstance, {
-	value: () => false,
-	writable: false,
-	enumerable: false,
-	configurable: false
-});
+// Object.defineProperty(Null, Symbol.hasInstance, {
+// 	value: () => false,
+// 	writable: false,
+// 	enumerable: false,
+// 	configurable: false
+// });
 
 export default Object.freeze(Null);

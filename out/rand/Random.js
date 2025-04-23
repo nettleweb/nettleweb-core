@@ -1,12 +1,12 @@
+import { STUB_FUNC } from "../misc/misc.js";
 import AbstractRandom from "./AbstractRandom.js";
 import { mulberry32, sfc32, splitmix32, xoshiro128 } from "./RandomImpl.js";
-globalThis.A = AbstractRandom;
 export default class Random extends AbstractRandom {
-    static [Symbol.hasInstance](e) {
-        return e instanceof AbstractRandom;
+    static [Symbol.hasInstance](w) {
+        return w instanceof AbstractRandom;
     }
     constructor(algorithm, seed) {
-        super(seed);
+        super();
         if (new.target === Random) {
             switch (algorithm || "mulberry32") {
                 case "sfc32":
@@ -22,4 +22,8 @@ export default class Random extends AbstractRandom {
             }
         }
     }
+    // stub implementation
+    seed = null;
+    rand() { return STUB_FUNC(); }
+    setSeed() { STUB_FUNC(); }
 }

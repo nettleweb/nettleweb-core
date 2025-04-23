@@ -50,7 +50,7 @@ declare global {
 			readonly seed: Seed | null;
 			readonly setSeed: (seed: Seed) => void;
 			readonly rand: () => number;
-			readonly randBuf: (buf: Buffer) => Buffer;
+			readonly randBuf: (buf: number[] | Buffer) => void;
 			readonly randInt: (max?: number | nul, min?: number | nul) => number;
 			readonly randUUID: () => string;
 		}
@@ -64,10 +64,12 @@ declare global {
 		};
 
 		export interface SecureRandom extends Random<number[]> {
-			readonly setSeed: (seed: number | number[]) => void;
+			readonly aes: AES;
+			readonly counter: number[];
+			readonly setCounter: (counter: CounterInit) => void;
 		}
 		export const SecureRandom: {
-			new(seed?: number | number[] | nul): SecureRandom;
+			new(seed?: number[] | nul, counter?: CounterInit | nul): SecureRandom;
 			readonly prototype: SecureRandom;
 		};
 
@@ -244,11 +246,28 @@ declare global {
 		}
 
 		//////////////////////////////////////////////////////
+		// Encryption Algorithms
+		//////////////////////////////////////////////////////
+		export type CounterInit = number | Buffer | Iterable<number> | ArrayLike<number>;
+
+		export interface AES {
+			readonly key: number[];
+			readonly encrypt: (data: number[] | Buffer) => number[];
+			readonly decrypt: (data: number[] | Buffer) => number[];
+			readonly encryptCTR: (data: number[], counter?: CounterInit | nul) => number[];
+			readonly decryptCTR: (data: number[], counter?: CounterInit | nul) => number[];
+		}
+		export const AES: {
+			new(seed: ArrayLike<number>): AES;
+			readonly prototype: AES;
+		};
+
+		//////////////////////////////////////////////////////
 		// Utils
 		//////////////////////////////////////////////////////
-		export function md5(data: string | Buffer): string;
-		export function sha256(data: string | Buffer): string;
-		export function cyrb128(data: string | Buffer): number[];
+		export function md5(data: string | number[] | Buffer): string;
+		export function sha256(data: string | number[] | Buffer): string;
+		export function cyrb128(data: string | number[] | Buffer): number[];
 	}
 }
 

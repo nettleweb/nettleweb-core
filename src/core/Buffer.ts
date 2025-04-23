@@ -1,7 +1,7 @@
 import { emptyBuffer, isArrayBuffer, isBuffer } from "../misc/misc.js";
 
 const Buffer: typeof NettleWeb.Buffer = Object.setPrototypeOf(function __struct__() {
-	return Reflect.construct(Uint8Array, arguments as any, Buffer);
+	return Reflect.construct(Uint8Array, arguments, Buffer);
 }, null);
 
 const BufferProto = Object.freeze(Object.create(null, {

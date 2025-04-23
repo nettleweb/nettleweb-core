@@ -17,8 +17,10 @@ import Charset, { ASCII, UTF16BE, UTF16LE, UTF32BE, UTF32LE, UTF_8 } from "./cod
 import SyncReadStream from "./core/SyncReadStream.js";
 import SyncWriteStream from "./core/SyncWriteStream.js";
 import sha256 from "./utils/sha256.js";
+import AES from "./utils/AES.js";
 const module = {
     md5: md5,
+    AES: AES,
     Hex: Hex,
     Null: Null,
     NTON: NTON,

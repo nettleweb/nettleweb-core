@@ -1,19 +1,7 @@
 import Null from "../misc/Null.js";
 export default class AbstractRandom extends Null {
-    #seed;
-    get seed() { return this.#seed; }
-    constructor(seed) {
-        super();
-        this.#seed = seed || null;
-    }
-    setSeed(seed) {
-        this.#seed = seed || null;
-    }
-    rand() {
-        throw new Error("Function not implemented");
-    }
     randBuf(buf) {
-        const len = buf.byteLength;
+        const len = buf.length;
         const rlen = len % 4;
         const llen = len - rlen;
         for (let i = 0; i < llen;) {

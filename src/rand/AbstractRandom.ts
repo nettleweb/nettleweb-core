@@ -1,24 +1,12 @@
 import Null from "../misc/Null.js";
 
-export default class AbstractRandom<S> extends Null implements NettleWeb.Random<S> {
-	#seed: S | null;
-	get seed(): S | null { return this.#seed; }
+export default abstract class AbstractRandom<S> extends Null implements NettleWeb.Random<S> {
+	abstract seed: S | null;
+	abstract rand(): number;
+	abstract setSeed(seed: S): void;
 
-	constructor(seed?: S | nul) {
-		super();
-		this.#seed = seed || null;
-	}
-
-	setSeed(seed: S) {
-		this.#seed = seed || null;
-	}
-
-	rand(): number {
-		throw new Error("Function not implemented");
-	}
-
-	randBuf(buf: NettleWeb.Buffer): NettleWeb.Buffer {
-		const len = buf.byteLength;
+	randBuf<E extends number[] | NettleWeb.Buffer>(buf: E): E {
+		const len = buf.length;
 		const rlen = len % 4;
 		const llen = len - rlen;
 
