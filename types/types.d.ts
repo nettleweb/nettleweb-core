@@ -10,7 +10,7 @@ declare global {
 		export const NettleWeb: NettleWeb;
 
 		export function loadModule(name: string, module: any): void;
-		export function unloadModule(name: string): boolean;
+		export function removeModule(name: string): boolean;
 		export function activeModules(): string[];
 
 		//////////////////////////////////////////////////////
@@ -38,7 +38,7 @@ declare global {
 			new(): Buffer;
 			readonly prototype: Buffer;
 			readonly emptyBuffer: Buffer;
-			readonly from: (data: BufferSource, arg1?: any) => Buffer;
+			readonly from: (data: BufferSource, mapFn?: ((v: any, k: number) => number) | nul) => Buffer;
 			readonly concat: (data: Iterable<BufferBytes> | ArrayLike<BufferBytes>, length?: number | nul) => Buffer;
 			readonly isArrayBuffer: (obj: any) => obj is ArrayBufferLike;
 		};
@@ -97,7 +97,6 @@ declare global {
 			readonly closed: boolean;
 			readonly canRead: boolean;
 			readonly canWrite: boolean;
-			readonly clone: () => Awaitable<Stream>;
 			readonly close: () => Awaitable<void>;
 		}
 		export const Stream: {
@@ -105,13 +104,15 @@ declare global {
 			readonly prototype: Stream;
 		};
 
-		/** @internal */
-		export interface ReadStreamBase extends Stream {
-			readonly pipe: (out: WriteStream) => Promise<number>;
-			readonly readBuf: (buf: Buffer, off?: number | nul, len?: number | nul) => Awaitable<number>;
+		export interface SyncStream extends Stream {
+			readonly close: () => void;
 		}
+		export const SyncStream: {
+			new(canRead?: boolean | nul, canWrite?: boolean | nul): SyncStream;
+		};
 
-		export interface ReadStream extends ReadStreamBase {
+		export interface ReadStream extends Stream {
+			readonly pipe: (out: WriteStream) => Promise<number>;
 			readonly read: () => Awaitable<number>;
 			readonly readBuf: (buf: Buffer, off?: number | nul, len?: number | nul) => Awaitable<number>;
 			readonly readText: (len: number, charset?: string | nul) => Awaitable<string>;
@@ -123,14 +124,14 @@ declare global {
 			readonly prototype: ReadStream;
 		};
 
-		export interface SyncReadStream extends ReadStreamBase {
+		export interface SyncReadStream extends SyncStream {
 			readonly read: () => number;
 			readonly readBuf: (buf: Buffer, off?: number | nul, len?: number | nul) => number;
 			readonly readText: (len: number, charset?: string | nul) => string;
 			readonly readNBytes: (n: number) => Buffer;
 			readonly readAllBytes: () => Buffer;
+			readonly pipe: (out: WriteStream) => Promise<number>;
 			readonly pipeSync: (out: SyncWriteStream) => number;
-			readonly close: () => void;
 		}
 		export const SyncReadStream: {
 			new(): SyncReadStream;
@@ -148,7 +149,7 @@ declare global {
 			readonly prototype: WriteStream;
 		};
 
-		export interface SyncWriteStream extends Stream {
+		export interface SyncWriteStream extends SyncStream {
 			readonly flush: () => void;
 			readonly write: (b: number) => void;
 			readonly writeBuf: (buf: Buffer, off?: number | nul, len?: number | nul) => void;
@@ -263,11 +264,11 @@ declare global {
 		};
 
 		//////////////////////////////////////////////////////
-		// Utils
+		// Hash Functions
 		//////////////////////////////////////////////////////
 		export function md5(data: string | number[] | Buffer): string;
 		export function sha256(data: string | number[] | Buffer): string;
-		export function cyrb128(data: string | number[] | Buffer): number[];
+		export function cyrb128(data: string | number[] | Buffer): string;
 	}
 }
 

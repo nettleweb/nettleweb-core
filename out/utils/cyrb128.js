@@ -15,10 +15,8 @@ export default function cyrb128(data) {
     h2 = Math.imul(h4 ^ (h2 >>> 22), 2869860233);
     h3 = Math.imul(h1 ^ (h3 >>> 17), 951274213);
     h4 = Math.imul(h2 ^ (h4 >>> 19), 2716044179);
-    return [
-        (h1 ^= (h2 ^ h3 ^ h4)) >>> 0,
-        (h2 ^ h1) >>> 0,
-        (h3 ^ h1) >>> 0,
-        (h4 ^ h1) >>> 0
-    ];
+    return ((h1 ^ h2 ^ h3 ^ h4) >>> 0).toString(16).padStart(8, "0") +
+        ((h2 ^ h1) >>> 0).toString(16).padStart(8, "0") +
+        ((h3 ^ h1) >>> 0).toString(16).padStart(8, "0") +
+        ((h4 ^ h1) >>> 0).toString(16).padStart(8, "0");
 }

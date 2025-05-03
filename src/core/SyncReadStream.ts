@@ -1,8 +1,12 @@
 import Charset, { UTF_8 } from "../coder/Charset.js";
-import Buffer from "./Buffer.js";
-import ReadStreamBase from "./ReadStreamBase.js";
+import { bufferConcat } from "../misc/misc.js";
+import SyncStream from "./SyncStream.js";
 
-export default class SyncReadStream extends ReadStreamBase implements NettleWeb.SyncReadStream {
+export default class SyncReadStream extends SyncStream implements NettleWeb.SyncReadStream {
+	constructor() {
+		super(true, false);
+	}
+
 	read(): number {
 		return -1;
 	}
@@ -58,7 +62,22 @@ export default class SyncReadStream extends ReadStreamBase implements NettleWeb.
 			chunks.push(buffer.subarray(0, i));
 		}
 
-		return Buffer.concat(chunks, len);
+		return bufferConcat(chunks, len);
+	}
+
+	async pipe(out: NettleWeb.WriteStream): Promise<number> {
+		const buffer = new Uint8Array(new ArrayBuffer(8192), 0, 8192);
+
+		let i: number = 0;
+		let len: number = 0;
+
+		while ((i = this.readBuf(buffer, 0, 8192)) >= 0) {
+			await out.writeBuf(buffer, 0, i);
+			await out.flush();
+			len += i;
+		}
+
+		return len;
 	}
 
 	pipeSync(out: NettleWeb.SyncWriteStream): number {

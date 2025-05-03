@@ -1,6 +1,6 @@
 import Charset, { UTF_8 } from "../coder/Charset.js";
-import Stream from "./Stream.js";
-export default class SyncWriteStream extends Stream {
+import SyncStream from "./SyncStream.js";
+export default class SyncWriteStream extends SyncStream {
     constructor() {
         super(false, true);
     }

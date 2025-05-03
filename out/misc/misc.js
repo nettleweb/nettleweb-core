@@ -43,8 +43,46 @@ export function isArrayBuffer(obj) {
         return false;
     }
 }
-export function isBuffer(obj) {
-    return ArrayBuffer.isView(obj) && obj[Symbol.toStringTag] === "Uint8Array";
+export function bufferFrom(data, mapFn) {
+    if (data == null || typeof data !== "object")
+        throw new Error("INvalid buffer source");
+    if (isArrayBuffer(data)) {
+        const buf = new Uint8Array(data);
+        if (mapFn != null) {
+            for (let i = 0; i < buf.byteLength; i++)
+                buf[i] = mapFn(buf[i], i);
+        }
+        return buf;
+    }
+    else if (ArrayBuffer.isView(data)) {
+        const buf = new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
+        if (mapFn != null) {
+            for (let i = 0; i < buf.byteLength; i++)
+                buf[i] = mapFn(buf[i], i);
+        }
+        return buf;
+    }
+    else
+        return Uint8Array.from(data, mapFn || void 0);
+}
+export function bufferConcat(data, length) {
+    if (data == null || typeof data !== "object")
+        throw new Error("Invalid buffer data");
+    if (!Array.isArray(data))
+        data = Array.from(data);
+    if (typeof length !== "number" || length < 0) {
+        length = 0;
+        for (const { byteLength } of data)
+            length += byteLength;
+    }
+    const buffer = new Uint8Array(length);
+    let offset = 0;
+    for (const e of data) {
+        const len = e.byteLength;
+        buffer.set("length" in e ? e : new Uint8Array("buffer" in e ? e.buffer : e, e.byteOffset || 0, len), offset);
+        offset += len;
+    }
+    return buffer;
 }
 export function seedgen() {
     return Math.floor(Math.random() * 4294967296);

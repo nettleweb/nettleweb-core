@@ -1,6 +1,6 @@
 import { UTF_8 } from "../coder/Charset.js";
 
-export default function cyrb128(data: string | ArrayLike<number>): [number, number, number, number] {
+export default function cyrb128(data: string | ArrayLike<number>): string {
 	const msg: number[] = Array.from(typeof data === "string" ? UTF_8.encode(data) : data);
 
 	let h1 = 1779033703;
@@ -20,10 +20,8 @@ export default function cyrb128(data: string | ArrayLike<number>): [number, numb
 	h3 = Math.imul(h1 ^ (h3 >>> 17), 951274213);
 	h4 = Math.imul(h2 ^ (h4 >>> 19), 2716044179);
 
-	return [
-		(h1 ^= (h2 ^ h3 ^ h4)) >>> 0,
-		(h2 ^ h1) >>> 0,
-		(h3 ^ h1) >>> 0,
-		(h4 ^ h1) >>> 0
-	];
+	return ((h1 ^ h2 ^ h3 ^ h4) >>> 0).toString(16).padStart(8, "0") +
+		((h2 ^ h1) >>> 0).toString(16).padStart(8, "0") +
+		((h3 ^ h1) >>> 0).toString(16).padStart(8, "0") +
+		((h4 ^ h1) >>> 0).toString(16).padStart(8, "0");
 }

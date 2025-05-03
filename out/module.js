@@ -18,6 +18,9 @@ import SyncReadStream from "./core/SyncReadStream.js";
 import SyncWriteStream from "./core/SyncWriteStream.js";
 import sha256 from "./utils/sha256.js";
 import AES from "./utils/AES.js";
+import SyncStream from "./core/SyncStream.js";
+import ReadStream from "./core/ReadStream.js";
+import WriteStream from "./core/WriteStream.js";
 const module = {
     md5: md5,
     AES: AES,
@@ -39,6 +42,9 @@ const module = {
     UTF32LE: UTF32LE,
     cyrb128: cyrb128,
     AsyncLock: AsyncLock,
+    SyncStream: SyncStream,
+    ReadStream: ReadStream,
+    WriteStream: WriteStream,
     EventEmitter: EventEmitter,
     SecureRandom: SecureRandom,
     SyncReadStream: SyncReadStream,

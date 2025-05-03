@@ -1,13 +1,12 @@
-const hexDigits = "0123456789abcdef";
-
 const Hex: typeof NettleWeb.Hex = {
 	encode: (data) => {
-		let str: string = "";
-		for (const b of data) {
-			str += hexDigits[b >> 4];
-			str += hexDigits[b & 0x0f];
-		}
-		return str;
+		const length = data.length;
+		const hex = new Array(length);
+
+		for (let i = 0; i < length; i++)
+			hex[i] = data[i].toString(16).padStart(2, "0");
+
+		return hex.join("");
 	},
 	decode: (data) => {
 		const length = Math.floor(data.length / 2);

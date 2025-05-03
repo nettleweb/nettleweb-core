@@ -1,6 +1,7 @@
-import { emptyBuffer, isArrayBuffer, isBuffer } from "../misc/misc.js";
+import { bufferConcat, bufferFrom, emptyBuffer, isArrayBuffer } from "../misc/misc.js";
 const Buffer = Object.setPrototypeOf(function __struct__() {
-    return Reflect.construct(Uint8Array, arguments, Buffer);
+    const func = new.target;
+    return Reflect.construct(Uint8Array, arguments, (func == null || func === Buffer) ? Uint8Array : func);
 }, null);
 const BufferProto = Object.freeze(Object.create(null, {
     [Symbol.toStringTag]: {
@@ -11,44 +12,16 @@ const BufferProto = Object.freeze(Object.create(null, {
     }
 }));
 Object.defineProperty(Buffer, "from", {
-    value: (data, arg1) => {
-        if (data == null || typeof data !== "object")
-            throw new Error("Invalid buffer source");
-        if (isBuffer(data))
-            return typeof arg1 === "function" ? data.map(arg1) : data;
-        else if (isArrayBuffer(data))
-            return new Uint8Array(data);
-        else if (ArrayBuffer.isView(data))
-            return new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
-        else
-            return Uint8Array.from(data, arg1);
-    },
+    value: bufferFrom,
     writable: false,
     enumerable: false,
     configurable: false
 });
 Object.defineProperty(Buffer, "concat", {
-    value: (data, length) => {
-        if (data == null || typeof data !== "object")
-            throw new Error("Invalid sources");
-        if (!Array.isArray(data))
-            data = Array.from(data);
-        if (typeof length !== "number") {
-            length = 0;
-            for (const { byteLength: len } of data) {
-                if (!Number.isSafeInteger(len) || len < 0)
-                    throw new Error("Invalid buffer object");
-                length += len;
-            }
-        }
-        const buffer = new Uint8Array(length);
-        let offset = 0;
-        for (const e of data) {
-            const length = e.byteLength;
-            buffer.set("length" in e ? e : new Uint8Array("buffer" in e ? e.buffer : e, 0, length), offset += length);
-        }
-        return buffer;
-    }
+    value: bufferConcat,
+    writable: false,
+    enumerable: false,
+    configurable: false
 });
 Object.defineProperty(Buffer, "prototype", {
     value: BufferProto,
@@ -69,7 +42,13 @@ Object.defineProperty(Buffer, "isArrayBuffer", {
     configurable: false
 });
 Object.defineProperty(Buffer, Symbol.hasInstance, {
-    value: isBuffer,
+    value: (e) => {
+        if (ArrayBuffer.isView(e)) {
+            const tag = e[Symbol.toStringTag];
+            return tag === "Uint8Array" || tag === "Buffer";
+        }
+        return false;
+    },
     writable: false,
     enumerable: false,
     configurable: false

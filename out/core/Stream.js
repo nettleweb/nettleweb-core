@@ -22,9 +22,6 @@ export default class Stream extends Null {
         this.#read = read ?? false;
         this.#write = write ?? false;
     }
-    clone() {
-        throw new Error("Function not implemented");
-    }
     close() {
         this.#closed = true;
     }

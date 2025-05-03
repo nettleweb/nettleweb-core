@@ -26,10 +26,6 @@ export default class Stream extends Null implements NettleWeb.Stream {
 		this.#write = write ?? false;
 	}
 
-	clone(): NettleWeb.Stream {
-		throw new Error("Function not implemented");
-	}
-
 	close(): Awaitable<void> {
 		this.#closed = true;
 	}

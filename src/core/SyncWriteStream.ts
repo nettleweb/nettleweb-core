@@ -1,7 +1,7 @@
 import Charset, { UTF_8 } from "../coder/Charset.js";
-import Stream from "./Stream.js";
+import SyncStream from "./SyncStream.js";
 
-export default class SyncWriteStream extends Stream implements NettleWeb.SyncWriteStream {
+export default class SyncWriteStream extends SyncStream implements NettleWeb.SyncWriteStream {
 	constructor() {
 		super(false, true);
 	}

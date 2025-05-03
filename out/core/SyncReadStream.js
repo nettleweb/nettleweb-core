@@ -1,7 +1,10 @@
 import Charset, { UTF_8 } from "../coder/Charset.js";
-import Buffer from "./Buffer.js";
-import ReadStreamBase from "./ReadStreamBase.js";
-export default class SyncReadStream extends ReadStreamBase {
+import { bufferConcat } from "../misc/misc.js";
+import SyncStream from "./SyncStream.js";
+export default class SyncReadStream extends SyncStream {
+    constructor() {
+        super(true, false);
+    }
     read() {
         return -1;
     }
@@ -45,7 +48,18 @@ export default class SyncReadStream extends ReadStreamBase {
             len += i;
             chunks.push(buffer.subarray(0, i));
         }
-        return Buffer.concat(chunks, len);
+        return bufferConcat(chunks, len);
+    }
+    async pipe(out) {
+        const buffer = new Uint8Array(new ArrayBuffer(8192), 0, 8192);
+        let i = 0;
+        let len = 0;
+        while ((i = this.readBuf(buffer, 0, 8192)) >= 0) {
+            await out.writeBuf(buffer, 0, i);
+            await out.flush();
+            len += i;
+        }
+        return len;
     }
     pipeSync(out) {
         const buffer = new Uint8Array(new ArrayBuffer(8192), 0, 8192);
