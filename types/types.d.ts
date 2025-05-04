@@ -6,6 +6,11 @@ declare global {
 	export type NettleWeb = typeof NettleWeb & { readonly NettleWeb: NettleWeb; };
 	export type globalThis = typeof globalThis & { readonly NettleWeb: NettleWeb };
 
+	export module globalThis {
+		export var window: globalThis;
+		export var globalThis: globalThis;
+	}
+
 	export module NettleWeb {
 		export const NettleWeb: NettleWeb;
 
@@ -194,18 +199,18 @@ declare global {
 		// Event Emitter
 		//////////////////////////////////////////////////////
 		export type EventKey = number | string | symbol;
-		export type EventListener<E extends EventEmitter = any> = (this: E, ...args: any[]) => void;
+		export type EventListener = (...args: any[]) => void;
 
 		export interface EventEmitter<M extends object = any> {
-			on<E extends keyof M>(event: E, listener: M[E]): void;
-			on(event: EventKey, listener: EventListener<this>): void;
-			once<E extends keyof M>(event: E, listener: M[E]): void;
-			once(event: EventKey, listener: EventListener<this>): void;
-			off<E extends keyof M>(event: E, listener: M[E]): boolean;
-			off(event: EventKey, listener: EventListener<this>): boolean;
+			on<E extends keyof M>(event: E extends EventKey ? E : EventKey, listener: M[E] extends EventListener ? M[E] : EventListener): void;
+			off<E extends keyof M>(event: E extends EventKey ? E : EventKey, listener: M[E] extends EventListener ? M[E] : EventListener): boolean;
+			once<E extends keyof M>(event: E extends EventKey ? E : EventKey, listener: M[E] extends EventListener ? M[E] : EventListener): void;
+			on(event: EventKey, listener: EventListener): void;
+			off(event: EventKey, listener: EventListener): boolean;
+			once(event: EventKey, listener: EventListener): void;
 			off(event?: EventKey | nul): boolean;
 			emit(event: EventKey, ...data: any[]): boolean;
-			getListeners(event?: EventKey | nul): EventListener<this>[];
+			getListeners(event?: EventKey | nul): EventListener[];
 		}
 		export const EventEmitter: {
 			new <E extends object = any>(): EventEmitter<E>;
