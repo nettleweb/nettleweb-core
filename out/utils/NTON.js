@@ -187,10 +187,16 @@ const NTON = {
                         }
                         return object;
                     }
-                case 102 /* DataID.binary */:
-                    return data.subarray(offset, offset += ((data[offset++] & 0xff) | ((data[offset++] & 0xff) << 8) | ((data[offset++] & 0xff) << 16) | ((data[offset++] & 0xff) << 24)) >>> 0);
+                case 102 /* DataID.binary */: // DO NOT INLINE the length as there will break the offset
+                    {
+                        const length = ((data[offset++] & 0xff) | ((data[offset++] & 0xff) << 8) | ((data[offset++] & 0xff) << 16) | ((data[offset++] & 0xff) << 24)) >>> 0;
+                        return data.subarray(offset, offset += length);
+                    }
                 case 101 /* DataID.string */:
-                    return UTF_8.decode(data.subarray(offset, offset += ((data[offset++] & 0xff) | ((data[offset++] & 0xff) << 8) | ((data[offset++] & 0xff) << 16) | ((data[offset++] & 0xff) << 24)) >>> 0));
+                    {
+                        const length = ((data[offset++] & 0xff) | ((data[offset++] & 0xff) << 8) | ((data[offset++] & 0xff) << 16) | ((data[offset++] & 0xff) << 24)) >>> 0;
+                        return UTF_8.decode(data.subarray(offset, offset += length));
+                    }
                 default:
                     throw new Error("Parse Error: Invalid data ID: " + id);
             }

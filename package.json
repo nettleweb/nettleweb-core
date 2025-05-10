@@ -2,7 +2,7 @@
 	"name": "@nettleweb/core",
 	"author": "NettleWeb <support@nettleweb.com> (https://nettleweb.com/)",
 	"license": "MIT",
-	"version": "0.0.4",
+	"version": "0.0.5",
 	"homepage": "https://github.com/nettleweb/nettleweb-core",
 	"description": "The core JavaScript support framework used by NettleWeb projects.",
 	"main": "main.js",

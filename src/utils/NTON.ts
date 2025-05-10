@@ -273,10 +273,16 @@ const NTON: typeof NettleWeb.NTON = {
 
 						return object;
 					}
-				case DataID.binary:
-					return data.subarray(offset, offset += ((data[offset++] & 0xff) | ((data[offset++] & 0xff) << 8) | ((data[offset++] & 0xff) << 16) | ((data[offset++] & 0xff) << 24)) >>> 0);
+				case DataID.binary: // DO NOT INLINE the length as there will break the offset
+					{
+						const length = ((data[offset++] & 0xff) | ((data[offset++] & 0xff) << 8) | ((data[offset++] & 0xff) << 16) | ((data[offset++] & 0xff) << 24)) >>> 0;
+						return data.subarray(offset, offset += length);
+					}
 				case DataID.string:
-					return UTF_8.decode(data.subarray(offset, offset += ((data[offset++] & 0xff) | ((data[offset++] & 0xff) << 8) | ((data[offset++] & 0xff) << 16) | ((data[offset++] & 0xff) << 24)) >>> 0));
+					{
+						const length = ((data[offset++] & 0xff) | ((data[offset++] & 0xff) << 8) | ((data[offset++] & 0xff) << 16) | ((data[offset++] & 0xff) << 24)) >>> 0;
+						return UTF_8.decode(data.subarray(offset, offset += length));
+					}
 				default:
 					throw new Error("Parse Error: Invalid data ID: " + id);
 			}
