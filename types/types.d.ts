@@ -1,3 +1,4 @@
+/*! NettleWeb Core v0.0.4 API Types | MIT License !*/
 /// <reference lib="es2015" />
 
 declare global {
@@ -202,9 +203,9 @@ declare global {
 		export type EventListener = (...args: any[]) => void;
 
 		export interface EventEmitter<M extends object = any> {
-			on<E extends keyof M>(event: E extends EventKey ? E : EventKey, listener: M[E] extends EventListener ? M[E] : EventListener): void;
-			off<E extends keyof M>(event: E extends EventKey ? E : EventKey, listener: M[E] extends EventListener ? M[E] : EventListener): boolean;
-			once<E extends keyof M>(event: E extends EventKey ? E : EventKey, listener: M[E] extends EventListener ? M[E] : EventListener): void;
+			on<E extends keyof M>(event: E, listener: M[E]): void;
+			off<E extends keyof M>(event: E, listener: M[E]): boolean;
+			once<E extends keyof M>(event: E, listener: M[E]): void;
 			on(event: EventKey, listener: EventListener): void;
 			off(event: EventKey, listener: EventListener): boolean;
 			once(event: EventKey, listener: EventListener): void;
@@ -247,6 +248,7 @@ declare global {
 		// Object Serializers
 		//////////////////////////////////////////////////////
 		export module NTON {
+			export function isNTON(data: Buffer): boolean;
 			export function encode(data: any): Buffer;
 			export function decode(data: Buffer): any;
 		}

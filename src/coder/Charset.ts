@@ -9,32 +9,25 @@ export const ASCII: NettleWeb.Charset = {
 
 export const UTF_8: NettleWeb.Charset = {
 	name: "utf-8",
-	encode: (data) => {
+	encode: (data: string) => {
 		const bytes: number[] = [];
 
-		for (let i = 0; i < data.length; i++) {
-			const ch = data.charCodeAt(i);
-			if (ch < 0x80)
-				bytes.push(ch);
-			else if (ch < 0x800)
-				bytes.push((ch >> 6) | 0xc0, (ch & 0x3f) | 0x80);
-			else if (ch < 0xd800 || ch >= 0xe000)
-				bytes.push((ch >> 12) | 0xe0, ((ch >> 6) & 0x3f) | 0x80, (ch & 0x3f) | 0x80);
-			else { // Surrogate pair
-				const cp = data.codePointAt(i++) || ch;
-				bytes.push(
-					(cp >> 18) | 0xf0,
-					((cp >> 12) & 0x3f) | 0x80,
-					((cp >> 6) & 0x3f) | 0x80,
-					(cp & 0x3f) | 0x80
-				);
-			}
+		for (const ch of data) {
+			const cp = ch.codePointAt(0) || 0;
+			if (cp < 0x80)
+				bytes.push(cp);
+			else if (cp < 0x800)
+				bytes.push((cp >> 6) | 0xc0, (cp & 0x3f) | 0x80);
+			else if (cp < 0x10000)
+				bytes.push((cp >> 12) | 0xe0, ((cp >> 6) & 0x3f) | 0x80, (cp & 0x3f) | 0x80);
+			else // Surrogate pair, cp < 0x110000
+				bytes.push((cp >> 18) | 0xf0, ((cp >> 12) & 0x3f) | 0x80, ((cp >> 6) & 0x3f) | 0x80, (cp & 0x3f) | 0x80);
 		}
 
 		return Uint8Array.from(bytes);
 	},
-	decode: (data) => {
-		const len = data.byteLength;
+	decode: (data: ArrayLike<number>) => {
+		const len = data.length;
 		let str: string = "";
 
 		for (let i = 0; i < len;) {
@@ -58,19 +51,21 @@ export const UTF_8: NettleWeb.Charset = {
 
 export const UTF16: NettleWeb.Charset = {
 	name: "utf-16",
-	encode: (data) => {
-		const length = data.length * 2;
-		const buffer = new ArrayBuffer(length + 2);
-		const dataView = new DataView(buffer, 0, length);
+	encode: (data: string) => {
+		const length = data.length;
+		const buffer = new Uint8Array(length * 2 + 2);
 
-		dataView.setUint16(0, 0xfeff, false); // byte order mark
-		for (let i = 2, p = 0; i < length; i += 2, p++)
-			dataView.setUint16(i, data.charCodeAt(p) || 0xfffd, false);
+		buffer[0] = 0xfe; buffer[1] = 0xff; // big endian byte order mark
+		for (let i = 2, p = 0; p < length; p++) {
+			const code = data.charCodeAt(p);
+			buffer[i++] = (code >> 8) & 0xff;
+			buffer[i++] = code & 0xff;
+		}
 
-		return new Uint8Array(buffer, 0, length);
+		return buffer;
 	},
-	decode: (data) => {
-		if (data.byteLength > 2) {
+	decode: (data: NettleWeb.Buffer) => {
+		if (data.length > 2) {
 			switch (((data[0] & 0xff) | ((data[1] & 0xff) << 8))) {
 				case 0xfeff: // little endian
 					return UTF16LE.decode(data.subarray(2));
@@ -80,29 +75,30 @@ export const UTF16: NettleWeb.Charset = {
 					break;
 			}
 		}
-		return UTF16BE.decode(data);
+		return UTF16BE.decode(data); // fallback
 	}
 };
 
 export const UTF16BE: NettleWeb.Charset = {
 	name: "utf-16be",
-	encode: (data) => {
-		const length = data.length * 2;
-		const buffer = new ArrayBuffer(length);
-		const dataView = new DataView(buffer, 0, length);
+	encode: (data: string) => {
+		const length = data.length;
+		const buffer = new Uint8Array(length * 2);
 
-		for (let i = 0, p = 0; i < length; i += 2, p++)
-			dataView.setUint16(i, data.charCodeAt(p) || 0xfffd, false);
+		for (let i = 0, p = 0; p < length; p++) {
+			const code = data.charCodeAt(p);
+			buffer[i++] = (code >> 8) & 0xff;
+			buffer[i++] = code & 0xff;
+		}
 
-		return new Uint8Array(buffer, 0, length);
+		return buffer;
 	},
-	decode: (data) => {
-		const length = Math.floor(data.byteLength / 2);
+	decode: (data: ArrayLike<number>) => {
+		const length = Math.floor(data.length / 2);
 		const output = new Array<string>(length);
-		const dataView = new DataView(data.buffer, data.byteOffset, length * 2);
 
-		for (let i = 0, p = 0; p < length; i += 2, p++)
-			output[p] = String.fromCharCode(dataView.getUint16(i, false));
+		for (let i = 0, p = 0; p < length; p++)
+			output[p] = String.fromCharCode(((data[i++] & 0xff) << 8) | (data[i++] & 0xff));
 
 		return output.join("");
 	}
@@ -110,23 +106,24 @@ export const UTF16BE: NettleWeb.Charset = {
 
 export const UTF16LE: NettleWeb.Charset = {
 	name: "utf-16le",
-	encode: (data) => {
-		const length = data.length * 2;
-		const buffer = new ArrayBuffer(length);
-		const dataView = new DataView(buffer, 0, length);
+	encode: (data: string) => {
+		const length = data.length;
+		const buffer = new Uint8Array(length * 2);
 
-		for (let i = 0, p = 0; i < length; i += 2, p++)
-			dataView.setUint16(i, data.charCodeAt(p) || 0xfffd, true);
+		for (let i = 0, p = 0; p < length; p++) {
+			const code = data.charCodeAt(p);
+			buffer[i++] = code & 0xff;
+			buffer[i++] = (code >> 8) & 0xff;
+		}
 
-		return new Uint8Array(buffer, 0, length);
+		return buffer;
 	},
-	decode: (data) => {
-		const length = Math.floor(data.byteLength / 2);
+	decode: (data: ArrayLike<number>) => {
+		const length = Math.floor(data.length / 2);
 		const output = new Array<string>(length);
-		const dataView = new DataView(data.buffer, data.byteOffset, length * 2);
 
-		for (let i = 0, p = 0; p < length; i += 2, p++)
-			output[p] = String.fromCharCode(dataView.getUint16(i, true));
+		for (let i = 0, p = 0; p < length; p++)
+			output[p] = String.fromCharCode((data[i++] & 0xff) | ((data[i++] & 0xff) << 8));
 
 		return output.join("");
 	}
@@ -134,24 +131,31 @@ export const UTF16LE: NettleWeb.Charset = {
 
 export const UTF32BE: NettleWeb.Charset = {
 	name: "utf-32be",
-	encode: (data) => {
-		const array = Array.from(data, (e) => e.codePointAt(0) || 0xfffd);
-		const length = array.length * 4;
-		const buffer = new ArrayBuffer(length);
-		const dataView = new DataView(buffer, 0, length);
+	encode: (data: string) => {
+		const array = Array.from(data);
+		const length = array.length; // IMPORTANT: Convert string into code point array before calculating length
+		const buffer = new Uint8Array(length * 4);
 
-		for (let i = 0, p = 0; i < length; i += 4, p++)
-			dataView.setUint32(i, array[p], false);
+		for (let i = 0, p = 0; p < length; p++) {
+			const code = array[p].codePointAt(0) || 0;
+			buffer[i++] = (code >> 24) & 0xff;
+			buffer[i++] = (code >> 16) & 0xff;
+			buffer[i++] = (code >> 8) & 0xff;
+			buffer[i++] = code & 0xff;
+		}
 
-		return new Uint8Array(buffer, 0, length);
+		return buffer;
 	},
-	decode: (data) => {
-		const length = Math.floor(data.byteLength / 4);
+	decode: (data: ArrayLike<number>) => {
+		const length = Math.floor(data.length / 4);
 		const output = new Array<string>(length);
-		const dataView = new DataView(data.buffer, data.byteOffset, length * 4);
 
-		for (let i = 0, p = 0; p < length; i += 4, p++) {
-			const code = dataView.getUint32(i, false);
+		for (let i = 0, p = 0; p < length; p++) {
+			const code = (((data[i++] & 0xff) << 24) |
+				((data[i++] & 0xff) << 16) |
+				((data[i++] & 0xff) << 8) |
+				(data[i++] & 0xff)) >>> 0;
+
 			output[p] = code > 0x10ffff ? "\ufffd" : String.fromCodePoint(code);
 		}
 
@@ -161,24 +165,31 @@ export const UTF32BE: NettleWeb.Charset = {
 
 export const UTF32LE: NettleWeb.Charset = {
 	name: "utf32-le",
-	encode: (data) => {
-		const array = Array.from(data, (e) => e.codePointAt(0) || 0xfffd);
-		const length = array.length * 4;
-		const buffer = new ArrayBuffer(length);
-		const dataView = new DataView(buffer, 0, length);
+	encode: (data: string) => {
+		const array = Array.from(data);
+		const length = array.length;
+		const buffer = new Uint8Array(length * 4);
 
-		for (let i = 0, p = 0; i < length; i += 4, p++)
-			dataView.setUint32(i, array[p], true);
+		for (let i = 0, p = 0; p < length; p++) {
+			const code = array[p].codePointAt(0) || 0;
+			buffer[i++] = code & 0xff;
+			buffer[i++] = (code >> 8) & 0xff;
+			buffer[i++] = (code >> 16) & 0xff;
+			buffer[i++] = (code >> 24) & 0xff;
+		}
 
-		return new Uint8Array(buffer, 0, length);
+		return buffer;
 	},
-	decode: (data) => {
-		const length = Math.floor(data.byteLength / 4);
+	decode: (data: ArrayLike<number>) => {
+		const length = Math.floor(data.length / 4);
 		const output = new Array<string>(length);
-		const dataView = new DataView(data.buffer, data.byteOffset, length * 4);
 
-		for (let i = 0, p = 0; p < length; i += 4, p++) {
-			const code = dataView.getUint32(i, true);
+		for (let i = 0, p = 0; p < length; p++) {
+			const code = ((data[i++] & 0xff) |
+				((data[i++] & 0xff) << 8) |
+				((data[i++] & 0xff) << 16) |
+				((data[i++] & 0xff) << 24)) >>> 0;
+
 			output[p] = code > 0x10ffff ? "\ufffd" : String.fromCodePoint(code);
 		}
 
