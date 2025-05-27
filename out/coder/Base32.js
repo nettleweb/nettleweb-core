@@ -1,10 +1,11 @@
 const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 const Base32 = {
     encode: (data) => {
+        const len = data.length;
         let out = "";
         let buf = 0;
         let bits = 0;
-        for (let i = 0; i < data.length; i++) {
+        for (let i = 0; i < len; i++) {
             buf = (buf << 8) | data[i];
             bits += 8;
             while (bits >= 5) {

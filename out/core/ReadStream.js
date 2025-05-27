@@ -1,5 +1,5 @@
-import Charset, { UTF_8 } from "../coder/Charset.js";
-import { bufferConcat } from "../misc/misc.js";
+import Charset from "../coder/Charset.js";
+import { bufferConcat, decodeUTF8 } from "../misc/misc.js";
 import Stream from "./Stream.js";
 export default class ReadStream extends Stream {
     constructor() {
@@ -23,7 +23,7 @@ export default class ReadStream extends Stream {
     async readText(len, cs) {
         const buffer = await this.readNBytes(len);
         if ((cs ||= "utf-8") === "utf-8")
-            return UTF_8.decode(buffer);
+            return decodeUTF8(buffer);
         else
             return Charset.forName(cs).decode(buffer);
     }

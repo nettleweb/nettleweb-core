@@ -1,5 +1,4 @@
-import { UTF_8 } from "../coder/Charset.js";
-import { isArrayBuffer } from "../misc/misc.js";
+import { decodeUTF8, encodeUTF8, isArrayBuffer } from "../misc/misc.js";
 
 const enum DataID {
 	Void = 0,
@@ -36,7 +35,7 @@ function encodeRaw(data: (number | Uint8Array)[], value: any, offset: number): n
 			break;
 		case "string":
 			{
-				const buffer = UTF_8.encode(value);
+				const buffer = encodeUTF8(value);
 				const length = buffer.byteLength;
 
 				data.push(
@@ -174,7 +173,7 @@ function encodeRaw(data: (number | Uint8Array)[], value: any, offset: number): n
 							continue; // ignore
 					}
 
-					const buffer = UTF_8.encode(k);
+					const buffer = encodeUTF8(k);
 					const length = buffer.byteLength;
 
 					data.push(
@@ -197,7 +196,7 @@ function encodeRaw(data: (number | Uint8Array)[], value: any, offset: number): n
 }
 
 const NTON: typeof NettleWeb.NTON = {
-	isNTON: (data: ArrayLike<number>) => data.length > 6 && data[0] === 0x80 && data[1] === 0x63 && data[2] === 0x62 && data[3] === 0x6a && data[4] === 0x66 && data[5] === 0x02,
+	validate: (data: ArrayLike<number>) => data.length > 6 && data[0] === 0x80 && data[1] === 0x63 && data[2] === 0x62 && data[3] === 0x6a && data[4] === 0x66 && data[5] === 0x02,
 	encode: (value) => {
 		const data: (number | Uint8Array)[] = [0x80, 0x63, 0x62, 0x6a, 0x66, 0x02];
 		const buffer = new Uint8Array(encodeRaw(data, value, 6));
@@ -268,7 +267,7 @@ const NTON: typeof NettleWeb.NTON = {
 
 						for (let i = 0; i < length; i++) {
 							const keyLength = ((data[offset++] & 0xff) | ((data[offset++] & 0xff) << 8) | ((data[offset++] & 0xff) << 16) | ((data[offset++] & 0xff) << 24)) >>> 0;
-							object[UTF_8.decode(data.subarray(offset, offset += keyLength))] = decode();
+							object[decodeUTF8(data.subarray(offset, offset += keyLength))] = decode();
 						}
 
 						return object;
@@ -281,7 +280,7 @@ const NTON: typeof NettleWeb.NTON = {
 				case DataID.string:
 					{
 						const length = ((data[offset++] & 0xff) | ((data[offset++] & 0xff) << 8) | ((data[offset++] & 0xff) << 16) | ((data[offset++] & 0xff) << 24)) >>> 0;
-						return UTF_8.decode(data.subarray(offset, offset += length));
+						return decodeUTF8(data.subarray(offset, offset += length));
 					}
 				default:
 					throw new Error("Parse Error: Invalid data ID: " + id);

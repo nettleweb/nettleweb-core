@@ -1,7 +1,7 @@
-import { UTF_8 } from "../coder/Charset.js";
+import { encodeUTF8 } from "../misc/misc.js";
 
-export default function cyrb128(data: string | ArrayLike<number>): string {
-	const msg: number[] = Array.from(typeof data === "string" ? UTF_8.encode(data) : data);
+export default function cyrb128(data: string | NettleWeb.BufferView): string {
+	const msg: number[] = Array.from(typeof data === "string" ? encodeUTF8(data) : data);
 
 	let h1 = 1779033703;
 	let h2 = 3144134277;

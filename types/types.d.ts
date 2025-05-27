@@ -33,8 +33,9 @@ declare global {
 		//////////////////////////////////////////////////////
 		// Buffer
 		//////////////////////////////////////////////////////
-		export type BufferBytes = Buffer | ArrayBufferLike | ArrayBufferView;
-		export type BufferSource = Iterable<number> | ArrayLike<number> | BufferBytes;
+		export type BufferView = Buffer | number[] | ArrayLike<number>;
+		export type BufferData = Buffer | ArrayBufferLike | ArrayBufferView;
+		export type BufferSource = Iterable<number> | ArrayLike<number> | BufferData;
 
 		export interface Buffer extends Uint8Array, Iterable<number>, ArrayLike<number> {
 			readonly length: number;
@@ -45,7 +46,8 @@ declare global {
 			readonly prototype: Buffer;
 			readonly emptyBuffer: Buffer;
 			readonly from: (data: BufferSource, mapFn?: ((v: any, k: number) => number) | nul) => Buffer;
-			readonly concat: (data: Iterable<BufferBytes> | ArrayLike<BufferBytes>, length?: number | nul) => Buffer;
+			readonly concat: (data: Iterable<BufferData> | ArrayLike<BufferData>, length?: number | nul) => Buffer;
+			readonly isBuffer: (obj: any) => obj is Buffer;
 			readonly isArrayBuffer: (obj: any) => obj is ArrayBufferLike;
 		};
 
@@ -62,10 +64,10 @@ declare global {
 		}
 		export const Random: {
 			new <S>(algorithm?: string | nul, seed?: S | nul): Random<S>;
-			new(algorithm: "sfc32", seed?: number[] | nul): Random<number[]>;
+			new(algorithm: "sfc32", seed?: NettleWeb.BufferView | nul): Random<number[]>;
 			new(algorithm: "splitmix32", seed?: number | nul): Random<number>;
 			new(algorithm: "mulberry32", seed?: number | nul): Random<number>;
-			new(algorithm: "xoshiro128", seed?: number[] | nul): Random<number[]>;
+			new(algorithm: "xoshiro128", seed?: NettleWeb.BufferView | nul): Random<number[]>;
 			readonly prototype: Random;
 		};
 
@@ -85,7 +87,7 @@ declare global {
 		export interface Charset {
 			readonly name: string;
 			readonly encode: (data: string) => Buffer;
-			readonly decode: (data: Buffer) => string;
+			readonly decode: (data: BufferView) => string;
 		}
 		export const Charset: {
 			new(name: string): Charset;
@@ -232,15 +234,15 @@ declare global {
 		// Binary Coders
 		//////////////////////////////////////////////////////
 		export module Hex {
-			export function encode(data: Buffer): string;
+			export function encode(data: BufferView): string;
 			export function decode(data: string): Buffer;
 		}
 		export module Base32 {
-			export function encode(data: Buffer): string;
+			export function encode(data: BufferView): string;
 			export function decode(data: string): Buffer;
 		}
 		export module Base64 {
-			export function encode(data: Buffer): string;
+			export function encode(data: BufferView): string;
 			export function decode(data: string): Buffer;
 		}
 
@@ -248,34 +250,34 @@ declare global {
 		// Object Serializers
 		//////////////////////////////////////////////////////
 		export module NTON {
-			export function isNTON(data: Buffer): boolean;
 			export function encode(data: any): Buffer;
 			export function decode(data: Buffer): any;
+			export function validate(data: BufferView): boolean;
 		}
 
 		//////////////////////////////////////////////////////
 		// Encryption Algorithms
 		//////////////////////////////////////////////////////
-		export type CounterInit = number | Buffer | Iterable<number> | ArrayLike<number>;
+		export type CounterInit = number | BufferView | Iterable<number>;
 
 		export interface AES {
 			readonly key: number[];
-			readonly encrypt: (data: number[] | Buffer) => number[];
-			readonly decrypt: (data: number[] | Buffer) => number[];
-			readonly encryptCTR: (data: number[], counter?: CounterInit | nul) => number[];
-			readonly decryptCTR: (data: number[], counter?: CounterInit | nul) => number[];
+			readonly encrypt: (data: BufferView) => number[];
+			readonly decrypt: (data: BufferView) => number[];
+			readonly encryptCTR: (data: BufferView, counter?: CounterInit | nul) => number[];
+			readonly decryptCTR: (data: BufferView, counter?: CounterInit | nul) => number[];
 		}
 		export const AES: {
-			new(seed: ArrayLike<number>): AES;
+			new(seed: BufferView): AES;
 			readonly prototype: AES;
 		};
 
 		//////////////////////////////////////////////////////
 		// Hash Functions
 		//////////////////////////////////////////////////////
-		export function md5(data: string | number[] | Buffer): string;
-		export function sha256(data: string | number[] | Buffer): string;
-		export function cyrb128(data: string | number[] | Buffer): string;
+		export function md5(data: string | BufferView): string;
+		export function sha256(data: string | BufferView): string;
+		export function cyrb128(data: string | BufferView): string;
 	}
 }
 

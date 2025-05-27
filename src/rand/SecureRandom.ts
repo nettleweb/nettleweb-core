@@ -18,7 +18,7 @@ export default class SecureRandom extends AbstractRandom<number[]> implements Ne
 		return this.#counter;
 	}
 
-	constructor(seed?: ArrayLike<number> | nul, counter?: NettleWeb.CounterInit | nul) {
+	constructor(seed?: NettleWeb.BufferView | nul, counter?: NettleWeb.CounterInit | nul) {
 		super();
 		this.#aes = new AES(seed ||= seedgen256());
 		this.#counter = initCounter(counter);
@@ -60,7 +60,7 @@ export default class SecureRandom extends AbstractRandom<number[]> implements Ne
 		return buf;
 	}
 
-	setSeed(seed: number[]) {
+	setSeed(seed: NettleWeb.BufferView) {
 		this.#aes = new AES(seed);
 	}
 

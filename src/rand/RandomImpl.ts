@@ -1,18 +1,13 @@
-import { seedgen, seedgen128 } from "../misc/misc.js";
+import { bytesToInt32, seedgen, seedgen128 } from "../misc/misc.js";
 import AbstractRandom from "./AbstractRandom.js";
 
 export class sfc32 extends AbstractRandom<number[]> {
 	#seed: number[];
 	get seed(): number[] { return this.#seed; }
 
-	constructor(seed?: any) {
+	constructor(seed?: NettleWeb.BufferView | nul) {
 		super();
-		if (seed != null) {
-			seed = Array.from(seed);
-			if (seed.length !== 4)
-				throw new Error("Invalid seed length");
-		}
-		this.#seed = seed || seedgen128();
+		this.#seed = seed == null ? seedgen128() : bytesToInt32(seed);
 	}
 
 	rand(): number {
@@ -27,11 +22,8 @@ export class sfc32 extends AbstractRandom<number[]> {
 		return (t >>> 0) / 4294967296;
 	}
 
-	setSeed(seed: ArrayLike<number>) {
-		if ((seed = Array.from(seed)).length !== 4)
-			throw new Error("Invalid seed length");
-
-		this.#seed = seed as number[];
+	setSeed(seed: NettleWeb.BufferView) {
+		this.#seed = bytesToInt32(seed);
 	}
 }
 
@@ -83,14 +75,9 @@ export class xoshiro128 extends AbstractRandom<number[]> {
 	#seed: number[];
 	get seed(): number[] { return this.#seed; }
 
-	constructor(seed?: any) {
+	constructor(seed?: NettleWeb.BufferView | nul) {
 		super();
-		if (seed != null) {
-			seed = Array.from(seed);
-			if (seed.length !== 4)
-				throw new Error("Invalid seed length");
-		}
-		this.#seed = seed || seedgen128();
+		this.#seed = seed == null ? seedgen128() : bytesToInt32(seed);
 	}
 
 	rand(): number {
@@ -103,10 +90,7 @@ export class xoshiro128 extends AbstractRandom<number[]> {
 		return (r >>> 0) / 4294967296;
 	}
 
-	setSeed(seed: number[]) {
-		if ((seed = Array.from(seed)).length !== 4)
-			throw new Error("Invalid seed length");
-
-		this.#seed = seed as number[];
+	setSeed(seed: NettleWeb.BufferView) {
+		this.#seed = bytesToInt32(seed);
 	}
 }

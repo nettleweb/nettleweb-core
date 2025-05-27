@@ -1,4 +1,4 @@
-import { UTF_8 } from "../coder/Charset.js";
+import { encodeUTF8 } from "../misc/misc.js";
 function rightRotate(value, amount) {
     return (value >>> amount) | (value << (32 - amount));
 }
@@ -25,7 +25,7 @@ const K = [
  * Re-written for clarity, ES6 features, and better adherence to the standard steps.
  */
 export default function sha256(data) {
-    const msg = Array.from(typeof data === "string" ? UTF_8.encode(data) : data);
+    const msg = Array.from(typeof data === "string" ? encodeUTF8(data) : data);
     // Initial hash values (first 32 bits of the fractional parts of the square roots of the first 8 primes 2..19):
     const H = [
         0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19

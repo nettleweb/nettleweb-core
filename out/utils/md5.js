@@ -1,4 +1,4 @@
-import { UTF_8 } from "../coder/Charset.js";
+import { encodeUTF8 } from "../misc/misc.js";
 const hc = "0123456789abcdef";
 const rh = (n) => {
     let s = "";
@@ -18,7 +18,7 @@ const gg = (a, b, c, d, x, s, t) => cm((b & d) | (c & (~d)), a, b, x, s, t);
 const hh = (a, b, c, d, x, s, t) => cm(b ^ c ^ d, a, b, x, s, t);
 const ii = (a, b, c, d, x, s, t) => cm(c ^ (b | (~d)), a, b, x, s, t);
 export default function md5(data) {
-    const msg = Array.from(typeof data === "string" ? UTF_8.encode(data) : data);
+    const msg = Array.from(typeof data === "string" ? encodeUTF8(data) : data);
     const msglen = msg.length;
     const length = (((msglen + 8) >> 6) + 1) * 16;
     const array = new Array(length).fill(0);

@@ -1,4 +1,4 @@
-import { UTF_8 } from "../coder/Charset.js";
+import { encodeUTF8 } from "../misc/misc.js";
 
 const hc = "0123456789abcdef";
 
@@ -20,8 +20,8 @@ const gg = (a: number, b: number, c: number, d: number, x: number, s: number, t:
 const hh = (a: number, b: number, c: number, d: number, x: number, s: number, t: number) => cm(b ^ c ^ d, a, b, x, s, t);
 const ii = (a: number, b: number, c: number, d: number, x: number, s: number, t: number) => cm(c ^ (b | (~d)), a, b, x, s, t);
 
-export default function md5(data: string | ArrayLike<number>): string {
-	const msg: number[] = Array.from(typeof data === "string" ? UTF_8.encode(data) : data);
+export default function md5(data: string | NettleWeb.BufferView): string {
+	const msg: number[] = Array.from(typeof data === "string" ? encodeUTF8(data) : data);
 	const msglen = msg.length;
 	const length = (((msglen + 8) >> 6) + 1) * 16;
 	const array = new Array<number>(length).fill(0);

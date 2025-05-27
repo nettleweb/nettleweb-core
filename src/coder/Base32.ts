@@ -1,12 +1,14 @@
 const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 
 const Base32: typeof NettleWeb.Base32 = {
-	encode: (data) => {
+	encode: (data: NettleWeb.BufferView) => {
+		const len = data.length;
+
 		let out: string = "";
 		let buf: number = 0;
 		let bits: number = 0;
 
-		for (let i = 0; i < data.length; i++) {
+		for (let i = 0; i < len; i++) {
 			buf = (buf << 8) | data[i];
 			bits += 8;
 
@@ -24,7 +26,7 @@ const Base32: typeof NettleWeb.Base32 = {
 
 		return out;
 	},
-	decode: (text) => {
+	decode: (text: string) => {
 		text = text.replace(/=+$/, "");
 
 		const out: number[] = [];

@@ -1,6 +1,6 @@
-import { UTF_8 } from "../coder/Charset.js";
+import { encodeUTF8 } from "../misc/misc.js";
 export default function cyrb128(data) {
-    const msg = Array.from(typeof data === "string" ? UTF_8.encode(data) : data);
+    const msg = Array.from(typeof data === "string" ? encodeUTF8(data) : data);
     let h1 = 1779033703;
     let h2 = 3144134277;
     let h3 = 1013904242;

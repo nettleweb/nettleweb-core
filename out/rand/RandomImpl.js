@@ -1,16 +1,11 @@
-import { seedgen, seedgen128 } from "../misc/misc.js";
+import { bytesToInt32, seedgen, seedgen128 } from "../misc/misc.js";
 import AbstractRandom from "./AbstractRandom.js";
 export class sfc32 extends AbstractRandom {
     #seed;
     get seed() { return this.#seed; }
     constructor(seed) {
         super();
-        if (seed != null) {
-            seed = Array.from(seed);
-            if (seed.length !== 4)
-                throw new Error("Invalid seed length");
-        }
-        this.#seed = seed || seedgen128();
+        this.#seed = seed == null ? seedgen128() : bytesToInt32(seed);
     }
     rand() {
         let [a, b, c, d] = this.#seed;
@@ -24,9 +19,7 @@ export class sfc32 extends AbstractRandom {
         return (t >>> 0) / 4294967296;
     }
     setSeed(seed) {
-        if ((seed = Array.from(seed)).length !== 4)
-            throw new Error("Invalid seed length");
-        this.#seed = seed;
+        this.#seed = bytesToInt32(seed);
     }
 }
 export class splitmix32 extends AbstractRandom {
@@ -70,12 +63,7 @@ export class xoshiro128 extends AbstractRandom {
     get seed() { return this.#seed; }
     constructor(seed) {
         super();
-        if (seed != null) {
-            seed = Array.from(seed);
-            if (seed.length !== 4)
-                throw new Error("Invalid seed length");
-        }
-        this.#seed = seed || seedgen128();
+        this.#seed = seed == null ? seedgen128() : bytesToInt32(seed);
     }
     rand() {
         let [a, b, c, d] = this.#seed;
@@ -91,8 +79,6 @@ export class xoshiro128 extends AbstractRandom {
         return (r >>> 0) / 4294967296;
     }
     setSeed(seed) {
-        if ((seed = Array.from(seed)).length !== 4)
-            throw new Error("Invalid seed length");
-        this.#seed = seed;
+        this.#seed = bytesToInt32(seed);
     }
 }

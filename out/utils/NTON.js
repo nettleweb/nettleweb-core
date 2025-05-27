@@ -1,5 +1,4 @@
-import { UTF_8 } from "../coder/Charset.js";
-import { isArrayBuffer } from "../misc/misc.js";
+import { decodeUTF8, encodeUTF8, isArrayBuffer } from "../misc/misc.js";
 function encodeRaw(data, value, offset) {
     switch (typeof value) {
         case "undefined":
@@ -12,7 +11,7 @@ function encodeRaw(data, value, offset) {
             break;
         case "string":
             {
-                const buffer = UTF_8.encode(value);
+                const buffer = encodeUTF8(value);
                 const length = buffer.byteLength;
                 data.push(101 /* DataID.string */, length & 0xff, (length >> 8) & 0xff, (length >> 16) & 0xff, (length >> 24) & 0xff, buffer);
                 offset += length + 5;
@@ -103,7 +102,7 @@ function encodeRaw(data, value, offset) {
                         default:
                             continue; // ignore
                     }
-                    const buffer = UTF_8.encode(k);
+                    const buffer = encodeUTF8(k);
                     const length = buffer.byteLength;
                     data.push(length & 0xff, (length >> 8) & 0xff, (length >> 16) & 0xff, (length >> 24) & 0xff, buffer);
                     offset += length + 4;
@@ -117,7 +116,7 @@ function encodeRaw(data, value, offset) {
     return offset;
 }
 const NTON = {
-    isNTON: (data) => data.length > 6 && data[0] === 0x80 && data[1] === 0x63 && data[2] === 0x62 && data[3] === 0x6a && data[4] === 0x66 && data[5] === 0x02,
+    validate: (data) => data.length > 6 && data[0] === 0x80 && data[1] === 0x63 && data[2] === 0x62 && data[3] === 0x6a && data[4] === 0x66 && data[5] === 0x02,
     encode: (value) => {
         const data = [0x80, 0x63, 0x62, 0x6a, 0x66, 0x02];
         const buffer = new Uint8Array(encodeRaw(data, value, 6));
@@ -183,7 +182,7 @@ const NTON = {
                         const object = Object.create(null);
                         for (let i = 0; i < length; i++) {
                             const keyLength = ((data[offset++] & 0xff) | ((data[offset++] & 0xff) << 8) | ((data[offset++] & 0xff) << 16) | ((data[offset++] & 0xff) << 24)) >>> 0;
-                            object[UTF_8.decode(data.subarray(offset, offset += keyLength))] = decode();
+                            object[decodeUTF8(data.subarray(offset, offset += keyLength))] = decode();
                         }
                         return object;
                     }
@@ -195,7 +194,7 @@ const NTON = {
                 case 101 /* DataID.string */:
                     {
                         const length = ((data[offset++] & 0xff) | ((data[offset++] & 0xff) << 8) | ((data[offset++] & 0xff) << 16) | ((data[offset++] & 0xff) << 24)) >>> 0;
-                        return UTF_8.decode(data.subarray(offset, offset += length));
+                        return decodeUTF8(data.subarray(offset, offset += length));
                     }
                 default:
                     throw new Error("Parse Error: Invalid data ID: " + id);

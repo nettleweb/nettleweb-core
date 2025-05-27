@@ -1,5 +1,5 @@
 const Hex: typeof NettleWeb.Hex = {
-	encode: (data) => {
+	encode: (data: NettleWeb.BufferView) => {
 		const length = data.length;
 		const hex = new Array(length);
 
@@ -8,7 +8,7 @@ const Hex: typeof NettleWeb.Hex = {
 
 		return hex.join("");
 	},
-	decode: (data) => {
+	decode: (data: string) => {
 		const length = Math.floor(data.length / 2);
 		const buffer = new Uint8Array(length);
 

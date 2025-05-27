@@ -1,4 +1,4 @@
-import { UTF_8 } from "../coder/Charset.js";
+import { encodeUTF8 } from "../misc/misc.js";
 
 function rightRotate(value: number, amount: number): number {
 	return (value >>> amount) | (value << (32 - amount));
@@ -28,8 +28,8 @@ const K = [
  *
  * Re-written for clarity, ES6 features, and better adherence to the standard steps.
  */
-export default function sha256(data: string | ArrayLike<number>): string {
-	const msg: number[] = Array.from(typeof data === "string" ? UTF_8.encode(data) : data);
+export default function sha256(data: string | NettleWeb.BufferView): string {
+	const msg: number[] = Array.from(typeof data === "string" ? encodeUTF8(data) : data);
 
 	// Initial hash values (first 32 bits of the fractional parts of the square roots of the first 8 primes 2..19):
 	const H = [

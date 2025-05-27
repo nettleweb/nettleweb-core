@@ -3,14 +3,18 @@ const Buffer = Object.setPrototypeOf(function __struct__() {
     const func = new.target;
     return Reflect.construct(Uint8Array, arguments, (func == null || func === Buffer) ? Uint8Array : func);
 }, null);
-const BufferProto = Object.freeze(Object.create(null, {
-    [Symbol.toStringTag]: {
-        value: "Buffer",
-        writable: false,
-        enumerable: false,
-        configurable: false
-    }
-}));
+Object.defineProperty(Buffer, "prototype", {
+    value: Object.freeze(Object.create(null)),
+    writable: false,
+    enumerable: false,
+    configurable: false
+});
+Object.defineProperty(Buffer, "emptyBuffer", {
+    value: emptyBuffer,
+    writable: false,
+    enumerable: false,
+    configurable: false
+});
 Object.defineProperty(Buffer, "from", {
     value: bufferFrom,
     writable: false,
@@ -23,25 +27,7 @@ Object.defineProperty(Buffer, "concat", {
     enumerable: false,
     configurable: false
 });
-Object.defineProperty(Buffer, "prototype", {
-    value: BufferProto,
-    writable: false,
-    enumerable: false,
-    configurable: false
-});
-Object.defineProperty(Buffer, "emptyBuffer", {
-    value: emptyBuffer,
-    writable: false,
-    enumerable: false,
-    configurable: false
-});
-Object.defineProperty(Buffer, "isArrayBuffer", {
-    value: isArrayBuffer,
-    writable: false,
-    enumerable: false,
-    configurable: false
-});
-Object.defineProperty(Buffer, Symbol.hasInstance, {
+Object.defineProperty(Buffer, "isBuffer", {
     value: (e) => {
         if (ArrayBuffer.isView(e)) {
             const tag = e[Symbol.toStringTag];
@@ -49,6 +35,12 @@ Object.defineProperty(Buffer, Symbol.hasInstance, {
         }
         return false;
     },
+    writable: false,
+    enumerable: false,
+    configurable: false
+});
+Object.defineProperty(Buffer, "isArrayBuffer", {
+    value: isArrayBuffer,
     writable: false,
     enumerable: false,
     configurable: false
