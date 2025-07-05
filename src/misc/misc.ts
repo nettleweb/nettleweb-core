@@ -1,9 +1,12 @@
-
 export const STUB_FUNC: (...args: any) => any = () => {
 	throw new Error("Function not implemented!");
 };
+export const ITER_FUNC = Array.prototype[Symbol.iterator];
+
+export const DEFAULT_CMP = (a: any, b: any) => a < b ? -1 : a > b ? 1 : 0
 
 export const emptyBuffer = new Uint8Array(new ArrayBuffer(0), 0, 0);
+export const singleBuffer = new Uint8Array(new ArrayBuffer(1), 0, 1);
 
 export function initCounter(state?: NettleWeb.CounterInit | nul): number[] {
 	if (state == null) {
@@ -111,6 +114,26 @@ export function seedgen256(): number[] {
 		seed[p++] = (rand >> 24) & 0xff;
 	}
 	return seed;
+}
+
+export function encodeHex(data: NettleWeb.BufferView): string {
+	const length = data.length;
+	const hex = new Array(length);
+
+	for (let i = 0; i < length; i++)
+		hex[i] = data[i].toString(16).padStart(2, "0");
+
+	return hex.join("");
+}
+
+export function decodeHex(data: string): NettleWeb.Buffer {
+	const length = Math.floor(data.length / 2);
+	const buffer = new Uint8Array(length);
+
+	for (let i = 0, p = 0; i < length; i++)
+		buffer[i] = parseInt(data.slice(p, p += 2), 16);
+
+	return buffer;
 }
 
 export function encodeUTF8(data: string): NettleWeb.Buffer {

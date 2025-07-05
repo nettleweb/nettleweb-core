@@ -1,4 +1,3 @@
-import $ from "./out/main.js";
-
-export { $ as NettleWeb };
-export default $;
+import _ from "./out/main.js";
+export { _ as NettleWeb };
+export default _;

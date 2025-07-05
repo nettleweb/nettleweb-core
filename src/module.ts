@@ -1,7 +1,5 @@
-import Buffer from "./core/Buffer.js";
-import BufferReadStream from "./core/BufferReadStream.js";
-import BufferWriteStream from "./core/BufferWriteStream.js";
-import Stream from "./core/Stream.js";
+import Buffer from "./io/Buffer.js";
+import Stream from "./io/Stream.js";
 import Null from "./misc/Null.js";
 import AsyncLock from "./utils/AsyncLock.js";
 import Base32 from "./coder/Base32.js";
@@ -14,22 +12,27 @@ import SecureRandom from "./rand/SecureRandom.js";
 import Random from "./rand/Random.js";
 import NTON from "./utils/NTON.js";
 import Charset, { ASCII, UTF16BE, UTF16LE, UTF32BE, UTF32LE, UTF_8 } from "./coder/Charset.js";
-import SyncReadStream from "./core/SyncReadStream.js";
-import SyncWriteStream from "./core/SyncWriteStream.js";
 import sha256 from "./utils/sha256.js";
 import AES from "./utils/AES.js";
-import SyncStream from "./core/SyncStream.js";
-import ReadStream from "./core/ReadStream.js";
-import WriteStream from "./core/WriteStream.js";
+import ReadStream from "./io/ReadStream.js";
+import WriteStream from "./io/WriteStream.js";
+import TreeMap from "./utils/TreeMap.js";
+import ArrayMap from "./utils/ArrayMap.js";
+import Path from "./utils/Path.js";
+import FSMap from "./fs/FSMap.js";
+import FileSystem from "./fs/FileSystem.js";
+import hmac_sha256 from "./utils/hmac_sha256.js";
 
 const module: Omit<NettleWeb, "NettleWeb" | "loadModule" | "removeModule" | "activeModules"> = {
 	md5: md5,
 	AES: AES,
 	Hex: Hex,
 	Null: Null,
+	Path: Path,
 	NTON: NTON,
 	ASCII: ASCII,
 	UTF_8: UTF_8,
+	FSMap: FSMap,
 	sha256: sha256,
 	Base32: Base32,
 	Base64: Base64,
@@ -42,16 +45,15 @@ const module: Omit<NettleWeb, "NettleWeb" | "loadModule" | "removeModule" | "act
 	UTF32BE: UTF32BE,
 	UTF32LE: UTF32LE,
 	cyrb128: cyrb128,
+	TreeMap: TreeMap,
+	ArrayMap: ArrayMap,
 	AsyncLock: AsyncLock,
-	SyncStream: SyncStream,
+	FileSystem: FileSystem,
 	ReadStream: ReadStream,
 	WriteStream: WriteStream,
+	hmac_sha256: hmac_sha256,
 	EventEmitter: EventEmitter,
-	SecureRandom: SecureRandom,
-	SyncReadStream: SyncReadStream,
-	SyncWriteStream: SyncWriteStream,
-	BufferReadStream: BufferReadStream,
-	BufferWriteStream: BufferWriteStream
+	SecureRandom: SecureRandom
 };
 
 Object.setPrototypeOf(module, null);

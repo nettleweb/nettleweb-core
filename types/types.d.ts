@@ -4,6 +4,7 @@
 declare global {
 	export type nul = null | undefined | void;
 	export type Awaitable<T> = T | PromiseLike<T>;
+	export type Comparator<T> = (a: T, b: T) => number;
 	export type NettleWeb = typeof NettleWeb & { readonly NettleWeb: NettleWeb; };
 	export type globalThis = typeof globalThis & { readonly NettleWeb: NettleWeb };
 
@@ -15,7 +16,7 @@ declare global {
 	export module NettleWeb {
 		export const NettleWeb: NettleWeb;
 
-		export function loadModule(name: string, module: any): void;
+		export function loadModule(name: string, module: object): void;
 		export function removeModule(name: string): boolean;
 		export function activeModules(): string[];
 
@@ -28,6 +29,50 @@ declare global {
 			(): Null;
 			new(): Null;
 			readonly prototype: Null;
+		};
+
+		//////////////////////////////////////////////////////
+		// Map
+		//////////////////////////////////////////////////////
+		export type MapInit<K, V> = MapLike<K, V> | Iterable<[K, V]> | { entries: () => Iterable<[K, V]>; };
+
+		export interface MapLike<K, V> {
+			readonly size: number;
+
+			has(key: K): boolean;
+			get(key: K): V | null;
+			set(key: K, value: V): void;
+			clear(): void;
+			delete(key: K): boolean;
+
+			keys(): K[];
+			values(): V[];
+			entries(): [K, V][];
+		}
+		export interface AsyncMap<K, V> {
+			has(key: K): Promise<boolean>;
+			get(key: K): Promise<V | null>;
+			set(key: K, value: V): Promise<void>;
+			clear(): Promise<void>;
+			delete(key: K): Promise<boolean>;
+
+			keys(): Promise<K[]>;
+			values(): Promise<V[]>;
+			entries(): Promise<[K, V][]>;
+		}
+
+		export interface TreeMap<K, V> extends MapLike<K, V>, Iterable<[K, V]> {
+		}
+		export const TreeMap: {
+			new <K, V>(init?: MapInit<K, V> | nul, cmpFn?: Comparator<K> | nul): TreeMap<K, V>;
+			readonly prototype: TreeMap<any, any>;
+		};
+
+		export interface ArrayMap<K, V> extends MapLike<K, V>, Iterable<[K, V]> {
+		}
+		export const ArrayMap: {
+			new <K, V>(init?: ArrayMap<K, V> | nul): ArrayMap<K, V>;
+			readonly prototype: ArrayMap<any, any>;
 		};
 
 		//////////////////////////////////////////////////////
@@ -100,89 +145,62 @@ declare global {
 		//////////////////////////////////////////////////////
 		// Streams
 		/////////////////////////////////////////////////////
-		export interface Stream {
-			readonly sync: boolean;
+		export interface Closeable {
+			close(): Promise<void>;
+		}
+		export interface Flushable {
+			flush(): Promise<void>;
+		}
+
+		export interface Stream extends Closeable {
 			readonly closed: boolean;
 			readonly canRead: boolean;
 			readonly canWrite: boolean;
-			readonly close: () => Awaitable<void>;
+			generator(chunkSize?: number | nul): AsyncGenerator<Buffer>;
 		}
 		export const Stream: {
-			new(sync?: boolean | nul, canRead?: boolean | nul, canWrite?: boolean | nul): Stream;
+			new(canRead?: boolean | nul, canWrite?: boolean | nul): Stream;
 			readonly prototype: Stream;
 		};
 
-		export interface SyncStream extends Stream {
-			readonly close: () => void;
-		}
-		export const SyncStream: {
-			new(canRead?: boolean | nul, canWrite?: boolean | nul): SyncStream;
-		};
-
 		export interface ReadStream extends Stream {
-			readonly pipe: (out: WriteStream) => Promise<number>;
-			readonly read: () => Awaitable<number>;
-			readonly readBuf: (buf: Buffer, off?: number | nul, len?: number | nul) => Awaitable<number>;
-			readonly readText: (len: number, charset?: string | nul) => Awaitable<string>;
-			readonly readNBytes: (n: number) => Awaitable<Buffer>;
-			readonly readAllBytes: () => Awaitable<Buffer>;
+			pipe(out: WriteStream, close?: boolean | nul): Promise<number>;
+			read(): Promise<number>;
+			read(buf: Buffer, off?: number | nul, len?: number | nul): Promise<number>;
+			readLine(charset?: nul, lineSep?: string | nul): Promise<Buffer>;
+			readLine(charset: Charset | string, lineSep?: string | nul): Promise<string>;
+			readNBytes(n: number, charset?: nul): Promise<Buffer>;
+			readNBytes(n: number, charset: Charset | string): Promise<string>;
+			readAllBytes(charset?: nul): Promise<Buffer>;
+			readAllBytes(charset: Charset | string): Promise<string>;
+
+			/** 
+			 * @abstract - Must override in subclasses
+			 * @protected - Should not be invoked directly
+			 */
+			_read(buf: Buffer): Awaitable<number>;
 		}
 		export const ReadStream: {
 			new(): ReadStream;
 			readonly prototype: ReadStream;
 		};
 
-		export interface SyncReadStream extends SyncStream {
-			readonly read: () => number;
-			readonly readBuf: (buf: Buffer, off?: number | nul, len?: number | nul) => number;
-			readonly readText: (len: number, charset?: string | nul) => string;
-			readonly readNBytes: (n: number) => Buffer;
-			readonly readAllBytes: () => Buffer;
-			readonly pipe: (out: WriteStream) => Promise<number>;
-			readonly pipeSync: (out: SyncWriteStream) => number;
-		}
-		export const SyncReadStream: {
-			new(): SyncReadStream;
-			readonly prototype: SyncReadStream;
-		};
+		export interface WriteStream extends Stream, Flushable {
+			write(b: number): Promise<void>;
+			write(buf: string, charset?: Charset | string | nul): Promise<void>;
+			write(buf: Buffer, off?: number | nul, len?: number | nul): Promise<void>;
+			writeln(buf: string, charset?: Charset | string | nul, lineEnd?: string | nul): Promise<void>;
+			writeln(buf: Buffer, off?: number | nul, len?: number | nul, lineEnd?: string | nul): Promise<void>;
 
-		export interface WriteStream extends Stream {
-			readonly flush: () => Awaitable<void>;
-			readonly write: (b: number) => Awaitable<void>;
-			readonly writeBuf: (buf: Buffer, off?: number | nul, len?: number | nul) => Awaitable<void>;
-			readonly writeText: (text: string, charset?: string | nul) => Awaitable<void>;
+			/** 
+			 * @abstract - Must override in subclasses
+			 * @protected - Should not be invoked directly
+			 */
+			_write(buf: Buffer): Awaitable<void>;
 		}
 		export const WriteStream: {
 			new(): WriteStream;
 			readonly prototype: WriteStream;
-		};
-
-		export interface SyncWriteStream extends SyncStream {
-			readonly flush: () => void;
-			readonly write: (b: number) => void;
-			readonly writeBuf: (buf: Buffer, off?: number | nul, len?: number | nul) => void;
-			readonly writeText: (text: string, charset?: string | nul) => void;
-		}
-		export const SyncWriteStream: {
-			new(): SyncWriteStream;
-			readonly prototype: SyncWriteStream;
-		};
-
-		export interface BufferReadStream extends SyncReadStream {
-			index: number;
-			buffer: Buffer;
-		}
-		export const BufferReadStream: {
-			new(buf: Buffer, index?: number | nul): BufferReadStream;
-			readonly prototype: BufferReadStream;
-		};
-
-		export interface BufferWriteStream extends SyncWriteStream {
-			readonly toBuffer: () => Buffer;
-		}
-		export const BufferWriteStream: {
-			new(): BufferWriteStream;
-			readonly prototype: BufferWriteStream;
 		};
 
 		//////////////////////////////////////////////////////
@@ -190,12 +208,58 @@ declare global {
 		//////////////////////////////////////////////////////
 		export interface AsyncLock extends PromiseLike<void> {
 			readonly locked: boolean;
-			readonly lock: () => void;
-			readonly unlock: () => void;
+			lock(): void;
+			unlock(): void;
 		}
 		export const AsyncLock: {
 			new(): AsyncLock;
 			readonly prototype: AsyncLock;
+		};
+
+		//////////////////////////////////////////////////////
+		// File System
+		//////////////////////////////////////////////////////
+		export interface FSMap extends AsyncMap<string, Buffer> {
+			readonly persistent: boolean;
+		}
+		export const FSMap: {
+			new(): FSMap;
+			readonly prototype: FSMap;
+		};
+
+		export interface FileInfo {
+			[k: string]: any; // internal attributes
+			name: string;
+			path: string;
+			size: number;
+			chunks: number;
+			isSymlink: boolean;
+			isDirectory: boolean;
+			lastModified: number;
+		}
+
+		export interface FileSystem {
+			list(path: string): Promise<string[]>;
+			copy(src: string, dest: string): Promise<void>;
+			move(src: string, dest: string): Promise<void>;
+			link(src: string, dest: string): Promise<void>;
+			read(path: string): Promise<Buffer>;
+			mkdir(path: string): Promise<void>;
+			write(path: string, data: Buffer): Promise<void>;
+			append(path: string, data: Buffer): Promise<void>;
+			delete(path: string): Promise<void>;
+			exists(path: string): Promise<boolean>;
+			getInfo(path: string): Promise<FileInfo | null>;
+			isRegular(path: string): Promise<boolean>;
+			isSymlink(path: string): Promise<boolean>;
+			isDirectory(path: string): Promise<boolean>;
+			subFileSystem(root: string): FileSystem;
+			createReadStream(path: string, start?: number | nul): ReadStream;
+			createWriteStream(path: string, append?: boolean | nul): WriteStream;
+		}
+		export const FileSystem: {
+			new(storage?: FSMap | nul): FileSystem;
+			readonly prototype: FileSystem;
 		};
 
 		//////////////////////////////////////////////////////
@@ -278,8 +342,19 @@ declare global {
 		export function md5(data: string | BufferView): string;
 		export function sha256(data: string | BufferView): string;
 		export function cyrb128(data: string | BufferView): string;
+		export function hmac_sha256(key: BufferView, data: BufferView): Buffer;
+
+		//////////////////////////////////////////////////////
+		// Other Util Functions
+		//////////////////////////////////////////////////////
+		export module Path {
+			export function name(path: string): string;
+			export function join(...parts: string[]): string;
+			export function parent(path: string): string;
+			export function extname(path: string): string;
+			export function normalize(path: string): string;
+		}
 	}
 }
 
-export { NettleWeb };
 export default NettleWeb;
