@@ -1,54 +1,95 @@
 const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+const lookup = new Uint8Array(256);
+
+for (let i = 0; i < 26; i++)
+	lookup[65 + i] = i; // A-Z
+for (let i = 0; i < 26; i++)
+	lookup[97 + i] = i; // a-z
+for (let i = 0; i < 6; i++)
+	lookup[50 + i] = 26 + i; // 0-9
 
 const Base32: typeof NettleWeb.Base32 = {
 	encode: (data: NettleWeb.BufferView) => {
-		const len = data.length;
+		const length = data.length;
+		const output = new Array(length === 0 ? 0 : Math.ceil(length / 5) * 8);
 
-		let out: string = "";
-		let buf: number = 0;
-		let bits: number = 0;
+		let blockCount = Math.floor(length / 5);
+		let i = 0, j = 0;
 
-		for (let i = 0; i < len; i++) {
-			buf = (buf << 8) | data[i];
-			bits += 8;
+		while (blockCount-- > 0) {
+			const b0 = data[i++];
+			const b1 = data[i++];
+			const b2 = data[i++];
+			const b3 = data[i++];
+			const b4 = data[i++];
 
-			while (bits >= 5) {
-				const index = (buf >> (bits - 5)) & 31;
-				out += chars[index];
-				bits -= 5;
-			}
+			output[j++] = chars[b0 >>> 3];
+			output[j++] = chars[((b0 & 0x07) << 2) | (b1 >>> 6)];
+			output[j++] = chars[(b1 >>> 1) & 0x1F];
+			output[j++] = chars[((b1 & 0x01) << 4) | (b2 >>> 4)];
+			output[j++] = chars[((b2 & 0x0F) << 1) | (b3 >>> 7)];
+			output[j++] = chars[(b3 >>> 2) & 0x1F];
+			output[j++] = chars[((b3 & 0x03) << 3) | (b4 >>> 5)];
+			output[j++] = chars[b4 & 0x1F];
 		}
 
-		if (bits > 0)
-			out += chars[(buf << (5 - bits)) & 31];
-		while (out.length % 8 !== 0)
-			out += "=";
+		const remaining = length % 5;
+		if (remaining > 0) {
+			const b0 = data[i++];
+			const b1 = remaining > 1 ? data[i++] : 0;
+			const b2 = remaining > 2 ? data[i++] : 0;
+			const b3 = remaining > 3 ? data[i++] : 0;
 
-		return out;
+			output[j++] = chars[b0 >>> 3];
+			output[j++] = chars[((b0 & 0x07) << 2) | (b1 >>> 6)];
+			output[j++] = remaining > 1 ? chars[(b1 >>> 1) & 0x1F] : "=";
+			output[j++] = remaining > 1 ? chars[((b1 & 0x01) << 4) | (b2 >>> 4)] : "=";
+			output[j++] = remaining > 2 ? chars[((b2 & 0x0F) << 1) | (remaining > 3 ? (b3 >>> 7) : 0)] : "=";
+			output[j++] = remaining > 3 ? chars[(b3 >>> 2) & 0x1F] : "=";
+			output[j++] = remaining > 3 ? chars[((b3 & 0x03) << 3) | 0] : "=";
+			output[j++] = "=";
+		}
+
+		return output.join("");
 	},
-	decode: (text: string) => {
-		text = text.replace(/=+$/, "");
+	decode: (str: string) => {
+		const length = str.length;
+		let n = 0;
+		let padStart = length;
 
-		const out: number[] = [];
-		let buf: number = 0;
-		let bits: number = 0;
+		for (let i = 0; i < length; i++) {
+			const code = str.charCodeAt(i);
+			if (code === 61) {
+				padStart = i;
+				break;
+			}
 
-		for (let i = 0; i < text.length; i++) {
-			const index = chars.indexOf(text[i].toUpperCase());
-			if (index < 0)
-				throw new Error("Invalid character found in Base32 string.");
+			if (lookup[code] !== 0xFF)
+				n++;
+		}
 
-			buf = (buf << 5) | index;
+		const output = new Uint8Array((n * 5) >>> 3);
+		let buffer = 0;
+		let bits = 0;
+		let index = 0;
+
+		for (let i = 0; i < padStart; i++) {
+			const code = str.charCodeAt(i);
+			const val = lookup[code];
+			if (val === 0xFF)
+				continue;
+
+			buffer = (buffer << 5) | val;
 			bits += 5;
 
 			if (bits >= 8) {
-				out.push((buf >> (bits - 8)) & 255);
 				bits -= 8;
+				output[index++] = (buffer >>> bits) & 0xFF;
 			}
 		}
 
-		return Uint8Array.from(out);
+		return output;
 	}
 };
 
-export default Object.freeze(Object.setPrototypeOf(Base32, null));
+export default Object.freeze(Object.setPrototypeOf(Base32, null)) as typeof NettleWeb.Base32;

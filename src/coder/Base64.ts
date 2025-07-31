@@ -1,41 +1,73 @@
 const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-const lookup = new Uint8Array(new ArrayBuffer(256), 0, 256);
+const lookup = new Uint8Array(256);
 
-for (let i = 0; i < chars.length; i++)
-	lookup[chars.charCodeAt(i)] = i;
+for (let i = 0; i < 26; i++)
+	lookup[65 + i] = i; // A-Z
+for (let i = 0; i < 26; i++)
+	lookup[97 + i] = i + 26; // a-z
+for (let i = 0; i < 10; i++)
+	lookup[48 + i] = i + 52; // 0-9
+
+lookup[43] = 62; lookup[47] = 63; lookup[61] = 0;
 
 const Base64: typeof NettleWeb.Base64 = {
 	encode: (data: NettleWeb.BufferView) => {
-		const len = data.length;
-		let str: string = "";
+		const length = data.length;
+		const output = new Array(((length / 3) | 0) * 4 + (length % 3 ? 4 : 0));
 
-		for (let i = 0; i < len; i += 3) {
-			const group = (data[i] << 16) | (data[i + 1] << 8) | data[i + 2];
-			str += chars[(group >> 18) & 63] + chars[(group >> 12) & 63] + chars[(group >> 6) & 63] + chars[group & 63];
+		let i = 0, j = 0;
+
+		while (i < length - 2) {
+			const n = (data[i] << 16) | (data[i + 1] << 8) | data[i + 2];
+			output[j] = chars[(n >>> 18) & 0x3F];
+			output[j + 1] = chars[(n >>> 12) & 0x3F];
+			output[j + 2] = chars[(n >>> 6) & 0x3F];
+			output[j + 3] = chars[n & 0x3F];
+			i += 3; j += 4;
 		}
 
-		switch (len % 3) {
-			case 1:
-				return str.slice(0, -2) + "==";
-			case 2:
-				return str.slice(0, -1) + "=";
-			default:
-				return str;
+		if (i < length) {
+			const a = data[i];
+			const b = i + 1 < length ? data[i + 1] : 0;
+			const n = (a << 16) | (b << 8);
+
+			output[j] = chars[(n >>> 18) & 0x3F];
+			output[j + 1] = chars[(n >>> 12) & 0x3F];
+			output[j + 2] = i + 1 < length ? chars[(n >>> 6) & 0x3F] : "=";
+			output[j + 3] = "=";
 		}
+
+		return output.join("");
 	},
-	decode: (text: string) => {
-		const len = text.length;
-		const buf = new Uint8Array(len * 0.75 - (text.slice(len - 2) === "==" ? 2 : text[len - 1] === "=" ? 1 : 0));
+	decode: (data: string) => {
+		const len = data.length;
+		let pad = 0;
 
-		for (let i = 0, p = 0; i < len; i += 4) {
-			const group = (lookup[text.charCodeAt(i)] << 18) | (lookup[text.charCodeAt(i + 1)] << 12) | (lookup[text.charCodeAt(i + 2)] << 6) | lookup[text.charCodeAt(i + 3)];
-			buf[p++] = (group >> 16) & 255;
-			buf[p++] = (group >> 8) & 255;
-			buf[p++] = group & 255;
+		if (data[len - 1] === "=")
+			pad++;
+		if (data[len - 2] === "=")
+			pad++;
+
+		const outLen = ((len * 3) >>> 2) - pad;
+		const output = new Uint8Array(outLen);
+		let i = 0, j = 0;
+
+		while (i < len) {
+			const a = lookup[data.charCodeAt(i)];
+			const b = lookup[data.charCodeAt(i + 1)];
+			const c = lookup[data.charCodeAt(i + 2)];
+			const d = lookup[data.charCodeAt(i + 3)];
+			const n = (a << 18) | (b << 12) | (c << 6) | d;
+
+			output[j] = (n >>> 16) & 0xFF;
+			if (j + 1 < outLen) output[j + 1] = (n >>> 8) & 0xFF;
+			if (j + 2 < outLen) output[j + 2] = n & 0xFF;
+
+			i += 4; j += 3;
 		}
 
-		return buf;
+		return output;
 	}
 };
 
-export default Object.freeze(Object.setPrototypeOf(Base64, null));
+export default Object.freeze(Object.setPrototypeOf(Base64, null)) as typeof NettleWeb.Base64;
