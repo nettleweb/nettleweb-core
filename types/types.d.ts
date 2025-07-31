@@ -108,11 +108,7 @@ declare global {
 			readonly randUUID: () => string;
 		}
 		export const Random: {
-			new <S>(algorithm?: string | nul, seed?: S | nul): Random<S>;
-			new(algorithm: "sfc32", seed?: NettleWeb.BufferView | nul): Random<number[]>;
-			new(algorithm: "splitmix32", seed?: number | nul): Random<number>;
-			new(algorithm: "mulberry32", seed?: number | nul): Random<number>;
-			new(algorithm: "xoshiro128", seed?: NettleWeb.BufferView | nul): Random<number[]>;
+			new(seed?: number | nul): Random;
 			readonly prototype: Random;
 		};
 
@@ -339,10 +335,51 @@ declare global {
 		//////////////////////////////////////////////////////
 		// Hash Functions
 		//////////////////////////////////////////////////////
+		export interface HashStream extends WriteStream {
+			readonly algorithm: string;
+			readonly hashLength: number;
+
+			_write(buf: BufferView): void;
+			hash(): number[];
+			reset(): void;
+		}
+		export const HashStream: {
+			new(): HashStream;
+			readonly prototype: HashStream;
+		};
+
+		export interface Sha1Stream extends HashStream {
+		}
+		export const Sha1Stream: {
+			new(): Sha1Stream;
+			readonly prototype: Sha1Stream;
+		};
+
+		export interface Sha256Stream extends HashStream {
+		}
+		export const Sha256Stream: {
+			new(): Sha256Stream;
+			readonly prototype: Sha256Stream;
+		};
+
+		export interface HmacSha1Stream extends HashStream {
+		}
+		export const HmacSha1Stream: {
+			new(key: BufferView): HmacSha1Stream;
+			readonly prototype: HmacSha1Stream;
+		};
+
+		export interface HmacSha256Stream extends HashStream {
+		}
+		export const HmacSha256Stream: {
+			new(key: BufferView): HmacSha256Stream;
+			readonly prototype: HmacSha256Stream;
+		};
+
 		export function md5(data: string | BufferView): string;
 		export function sha256(data: string | BufferView): string;
 		export function cyrb128(data: string | BufferView): string;
-		export function hmac_sha256(key: BufferView, data: BufferView): Buffer;
+		export function hmac_sha256(key: BufferView, data: BufferView): number[];
 
 		//////////////////////////////////////////////////////
 		// Other Util Functions

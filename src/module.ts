@@ -22,6 +22,11 @@ import Path from "./utils/Path.js";
 import FSMap from "./fs/FSMap.js";
 import FileSystem from "./fs/FileSystem.js";
 import hmac_sha256 from "./utils/hmac_sha256.js";
+import Sha256Stream from "./hash/Sha256Stream.js";
+import HashStream from "./hash/HashStream.js";
+import Sha1Stream from "./hash/Sha1Stream.js";
+import HmacSha1Stream from "./hash/HmacSha1Stream.js";
+import HmacSha256Stream from "./hash/HmacSha256Stream.js";
 
 const module: Omit<NettleWeb, "NettleWeb" | "loadModule" | "removeModule" | "activeModules"> = {
 	md5: md5,
@@ -53,7 +58,12 @@ const module: Omit<NettleWeb, "NettleWeb" | "loadModule" | "removeModule" | "act
 	WriteStream: WriteStream,
 	hmac_sha256: hmac_sha256,
 	EventEmitter: EventEmitter,
-	SecureRandom: SecureRandom
+	SecureRandom: SecureRandom,
+	HashStream: HashStream,
+	Sha1Stream: Sha1Stream,
+	Sha256Stream: Sha256Stream,
+	HmacSha1Stream: HmacSha1Stream,
+	HmacSha256Stream: HmacSha256Stream
 };
 
 Object.setPrototypeOf(module, null);
