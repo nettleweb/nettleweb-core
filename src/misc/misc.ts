@@ -1,8 +1,4 @@
-export const STUB_FUNC: (...args: any) => any = () => {
-	throw new Error("Function not implemented!");
-};
 export const ITER_FUNC = Array.prototype[Symbol.iterator];
-
 export const DEFAULT_CMP = (a: any, b: any) => a < b ? -1 : a > b ? 1 : 0
 
 export const emptyBuffer = new Uint8Array(new ArrayBuffer(0), 0, 0);
@@ -96,18 +92,14 @@ export function bufferConcat(data: NettleWeb.BufferData[], length?: number | nul
 	return buffer;
 }
 
-export function seedgen(): number {
+export function seedgen32(): number {
 	return Math.floor(Math.random() * 4294967296);
 }
 
-export function seedgen128(): number[] {
-	return [seedgen(), seedgen(), seedgen(), seedgen()];
-}
-
 export function seedgen256(): number[] {
-	const seed: number[] = new Array(16);
+	const seed: number[] = new Array(32);
 	for (let i = 0, p = 0; i < 4; i++) {
-		const rand = seedgen();
+		const rand = seedgen32();
 		seed[p++] = rand & 0xff;
 		seed[p++] = (rand >> 8) & 0xff;
 		seed[p++] = (rand >> 16) & 0xff;

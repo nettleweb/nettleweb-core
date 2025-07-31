@@ -1,32 +1,26 @@
-import { STUB_FUNC } from "../misc/misc.js";
+import { seedgen32 } from "../misc/misc.js";
 import AbstractRandom from "./AbstractRandom.js";
-import { mulberry32, sfc32, splitmix32, xoshiro128 } from "./RandomImpl.js";
 
-export default class Random<S> extends AbstractRandom<S> implements NettleWeb.Random<S> {
-	static [Symbol.hasInstance](w: any): boolean {
-		return w instanceof AbstractRandom;
+export default class Random extends AbstractRandom<number> implements NettleWeb.Random {
+	#seed: number;
+
+	get seed(): number {
+		return this.#seed;
 	}
 
-	constructor(algorithm?: string | nul, seed?: any) {
+	constructor(seed?: number | nul) {
 		super();
-		if (new.target === Random) {
-			switch (algorithm || "mulberry32") {
-				case "sfc32":
-					return new sfc32(seed) as any;
-				case "splitmix32":
-					return new splitmix32(seed) as any;
-				case "mulberry32":
-					return new mulberry32(seed) as any;
-				case "xoshiro128":
-					return new xoshiro128(seed) as any;
-				default:
-					throw new Error("Unsupported algorithm: " + algorithm);
-			}
-		}
+		this.#seed = seed || seedgen32();
 	}
 
-	// stub implementation
-	seed = null;
-	rand() { return STUB_FUNC(); }
-	setSeed() { STUB_FUNC(); }
+	rand(): number {
+		let t = this.#seed = (this.#seed | 0) + 0x6D2B79F5;
+		t = Math.imul(t ^ t >>> 15, t | 1);
+		t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+		return ((t ^ t >>> 14) >>> 0) / 4294967296;
+	}
+
+	setSeed(seed: number) {
+		this.#seed = seed;
+	}
 }

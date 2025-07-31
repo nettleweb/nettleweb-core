@@ -1,4 +1,4 @@
-import { decodeUTF16BE, decodeUTF16LE, decodeUTF8, encodeUTF8, STUB_FUNC } from "../misc/misc.js";
+import { decodeUTF16BE, decodeUTF16LE, decodeUTF8, encodeUTF8 } from "../misc/misc.js";
 import Null from "../misc/Null.js";
 export const ASCII = {
     name: "ascii",
@@ -187,7 +187,10 @@ export default class Charset extends Null {
     static defaultCharset() {
         return UTF_8; // always
     }
-    // stub abstract functions
-    encode() { return STUB_FUNC(); }
-    decode() { return STUB_FUNC(); }
+    encode(data) {
+        return encodeUTF8(data); // dummy
+    }
+    decode(data) {
+        return decodeUTF8(data); // dummy
+    }
 }

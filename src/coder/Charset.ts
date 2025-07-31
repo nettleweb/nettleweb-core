@@ -1,4 +1,4 @@
-import { decodeUTF16BE, decodeUTF16LE, decodeUTF8, encodeUTF8, STUB_FUNC } from "../misc/misc.js";
+import { decodeUTF16BE, decodeUTF16LE, decodeUTF8, encodeUTF8 } from "../misc/misc.js";
 import Null from "../misc/Null.js";
 
 export const ASCII: NettleWeb.Charset = {
@@ -222,7 +222,11 @@ export default class Charset extends Null implements NettleWeb.Charset {
 		return UTF_8; // always
 	}
 
-	// stub abstract functions
-	encode() { return STUB_FUNC(); }
-	decode() { return STUB_FUNC(); }
+	encode(data: string): NettleWeb.Buffer {
+		return encodeUTF8(data); // dummy
+	}
+
+	decode(data: NettleWeb.BufferView): string {
+		return decodeUTF8(data); // dummy
+	}
 }

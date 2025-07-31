@@ -1,6 +1,3 @@
-export const STUB_FUNC = () => {
-    throw new Error("Function not implemented!");
-};
 export const ITER_FUNC = Array.prototype[Symbol.iterator];
 export const DEFAULT_CMP = (a, b) => a < b ? -1 : a > b ? 1 : 0;
 export const emptyBuffer = new Uint8Array(new ArrayBuffer(0), 0, 0);
@@ -87,16 +84,13 @@ export function bufferConcat(data, length) {
     }
     return buffer;
 }
-export function seedgen() {
+export function seedgen32() {
     return Math.floor(Math.random() * 4294967296);
 }
-export function seedgen128() {
-    return [seedgen(), seedgen(), seedgen(), seedgen()];
-}
 export function seedgen256() {
-    const seed = new Array(16);
+    const seed = new Array(32);
     for (let i = 0, p = 0; i < 4; i++) {
-        const rand = seedgen();
+        const rand = seedgen32();
         seed[p++] = rand & 0xff;
         seed[p++] = (rand >> 8) & 0xff;
         seed[p++] = (rand >> 16) & 0xff;
