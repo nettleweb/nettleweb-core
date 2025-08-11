@@ -84,16 +84,17 @@ declare global {
 
 		export interface Buffer extends Uint8Array, Iterable<number>, ArrayLike<number> {
 			readonly length: number;
-			readonly [Symbol.iterator]: () => IterableIterator<number>;
+			[Symbol.iterator](): ArrayIterator<number>;
 		}
 		export const Buffer: {
 			new(): Buffer;
 			readonly prototype: Buffer;
 			readonly emptyBuffer: Buffer;
-			readonly from: (data: BufferSource, mapFn?: ((v: any, k: number) => number) | nul) => Buffer;
-			readonly concat: (data: Iterable<BufferData> | ArrayLike<BufferData>, length?: number | nul) => Buffer;
-			readonly isBuffer: (obj: any) => obj is Buffer;
-			readonly isArrayBuffer: (obj: any) => obj is ArrayBufferLike;
+
+			from(data: BufferSource, mapFn?: ((v: any, k: number) => number) | nul): Buffer;
+			concat(data: Iterable<BufferData> | ArrayLike<BufferData>, length?: number | nul): Buffer;
+			isBuffer(obj: any): obj is Buffer;
+			isArrayBuffer(obj: any): obj is ArrayBufferLike;
 		};
 
 		//////////////////////////////////////////////////////
@@ -101,11 +102,12 @@ declare global {
 		//////////////////////////////////////////////////////
 		export interface Random<Seed = number> {
 			readonly seed: Seed | null;
-			readonly setSeed: (seed: Seed) => void;
-			readonly rand: () => number;
-			readonly randBuf: (buf: number[] | Buffer) => void;
-			readonly randInt: (max?: number | nul, min?: number | nul) => number;
-			readonly randUUID: () => string;
+
+			setSeed(seed: Seed): void;
+			rand(): number;
+			randBuf(buf: number[] | Buffer): void;
+			randInt(max?: number | nul, min?: number | nul): number;
+			randUUID(): string;
 		}
 		export const Random: {
 			new(seed?: number | nul): Random;
@@ -115,7 +117,7 @@ declare global {
 		export interface SecureRandom extends Random<number[]> {
 			readonly aes: AES;
 			readonly counter: number[];
-			readonly setCounter: (counter: CounterInit) => void;
+			setCounter(counter: CounterInit): void;
 		}
 		export const SecureRandom: {
 			new(seed?: number[] | nul, counter?: CounterInit | nul): SecureRandom;
@@ -127,15 +129,16 @@ declare global {
 		//////////////////////////////////////////////////////
 		export interface Charset {
 			readonly name: string;
-			readonly encode: (data: string) => Buffer;
-			readonly decode: (data: BufferView) => string;
+			encode(data: string): Buffer;
+			decode(data: BufferView): string;
 		}
 		export const Charset: {
 			new(name: string): Charset;
 			readonly prototype: Charset;
-			readonly forName: (name: string) => Charset;
-			readonly isSupported: (name: string) => boolean;
-			readonly defaultCharset: () => Charset;
+
+			forName(name: string): Charset;
+			isSupported(name: string): boolean;
+			defaultCharset(): Charset;
 		};
 
 		//////////////////////////////////////////////////////
@@ -322,10 +325,11 @@ declare global {
 
 		export interface AES {
 			readonly key: number[];
-			readonly encrypt: (data: BufferView) => number[];
-			readonly decrypt: (data: BufferView) => number[];
-			readonly encryptCTR: (data: BufferView, counter?: CounterInit | nul) => number[];
-			readonly decryptCTR: (data: BufferView, counter?: CounterInit | nul) => number[];
+
+			encrypt(data: BufferView): number[];
+			decrypt(data: BufferView): number[];
+			encryptCTR(data: BufferView, counter?: CounterInit | nul): number[];
+			decryptCTR(data: BufferView, counter?: CounterInit | nul): number[];
 		}
 		export const AES: {
 			new(seed: BufferView): AES;
@@ -394,4 +398,5 @@ declare global {
 	}
 }
 
+export { NettleWeb };
 export default NettleWeb;

@@ -2,7 +2,7 @@
 	"name": "@nettleweb/core",
 	"author": "NettleWeb <support@nettleweb.com> (https://nettleweb.com/)",
 	"license": "MIT",
-	"version": "0.2.0",
+	"version": "0.3.0",
 	"homepage": "https://github.com/nettleweb/nettleweb-core",
 	"description": "The core JavaScript support framework used by NettleWeb projects.",
 	"main": "main.js",
@@ -28,7 +28,7 @@
 		"url": "git+https://github.com/nettleweb/nettleweb-core.git"
 	},
 	"devDependencies": {
-		"typescript": "^5.8.3"
+		"typescript": "^5.9.2"
 	},
 	"scripts": {
 		"build": "./scripts/build.sh"
