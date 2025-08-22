@@ -27,9 +27,13 @@ import HashStream from "./hash/HashStream.js";
 import Sha1Stream from "./hash/Sha1Stream.js";
 import HmacSha1Stream from "./hash/HmacSha1Stream.js";
 import HmacSha256Stream from "./hash/HmacSha256Stream.js";
+import StringMap from "./utils/StringMap.js";
+import URL from "./utils/URL.js";
+import URLQueries from "./utils/URLQueries.js";
 const module = {
     md5: md5,
     AES: AES,
+    URL: URL,
     Hex: Hex,
     Null: Null,
     Path: Path,
@@ -51,7 +55,9 @@ const module = {
     cyrb128: cyrb128,
     TreeMap: TreeMap,
     ArrayMap: ArrayMap,
+    StringMap: StringMap,
     AsyncLock: AsyncLock,
+    URLQueries: URLQueries,
     FileSystem: FileSystem,
     ReadStream: ReadStream,
     WriteStream: WriteStream,
@@ -64,17 +70,4 @@ const module = {
     HmacSha1Stream: HmacSha1Stream,
     HmacSha256Stream: HmacSha256Stream
 };
-Object.setPrototypeOf(module, null);
-Object.defineProperty(module, "NettleWeb", {
-    value: module,
-    writable: false,
-    enumerable: false,
-    configurable: false
-});
-Object.defineProperty(module, Symbol.toStringTag, {
-    value: "NettleWeb",
-    writable: false,
-    enumerable: false,
-    configurable: false
-});
-export default module;
+export default Object.setPrototypeOf(module, null);

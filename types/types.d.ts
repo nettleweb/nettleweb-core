@@ -35,6 +35,7 @@ declare global {
 		// Map
 		//////////////////////////////////////////////////////
 		export type MapInit<K, V> = MapLike<K, V> | Iterable<[K, V]> | { entries: () => Iterable<[K, V]>; };
+		export type StringMapInit = MapInit<string, string> | Record<string, string>;
 
 		export interface MapLike<K, V> {
 			readonly size: number;
@@ -62,6 +63,7 @@ declare global {
 		}
 
 		export interface TreeMap<K, V> extends MapLike<K, V>, Iterable<[K, V]> {
+			[Symbol.iterator](): IterableIterator<[K, V]>;
 		}
 		export const TreeMap: {
 			new <K, V>(init?: MapInit<K, V> | nul, cmpFn?: Comparator<K> | nul): TreeMap<K, V>;
@@ -69,10 +71,19 @@ declare global {
 		};
 
 		export interface ArrayMap<K, V> extends MapLike<K, V>, Iterable<[K, V]> {
+			[Symbol.iterator](): IterableIterator<[K, V]>;
 		}
 		export const ArrayMap: {
 			new <K, V>(init?: ArrayMap<K, V> | nul): ArrayMap<K, V>;
 			readonly prototype: ArrayMap<any, any>;
+		};
+
+		export interface StringMap extends MapLike<string, string>, Iterable<[string, string]> {
+			[Symbol.iterator](): IterableIterator<[string, string]>;
+		}
+		export const StringMap: {
+			new(init?: StringMapInit | nul): StringMap;
+			readonly prototype: StringMap;
 		};
 
 		//////////////////////////////////////////////////////
@@ -202,6 +213,35 @@ declare global {
 			readonly prototype: WriteStream;
 		};
 
+		// Proposed New Apis
+
+		// export interface PassThroughStream extends WriteStream {
+		// 	readonly readStream: ReadStream;
+		// }
+		// export const PassThroughStream: {
+		// 	new(): PassThroughStream;
+		// 	readonly prototype: PassThroughStream;
+		// };
+
+		// export interface InMemoryReadStream extends ReadStream {
+		// 	buffer: NettleWeb.Buffer;
+		// 	offset: number;
+		// }
+		// export const InMemoryReadStream: {
+		// 	new(buffer: NettleWeb.Buffer): InMemoryReadStream;
+		// 	readonly prototype: InMemoryReadStream;
+		// };
+
+		// export interface InMemoryWriteStream {
+		// 	reset(): void;
+		// 	buffer(): Buffer;
+		// }
+		// export const InMemoryWriteStream: {
+		// 	new(): InMemoryWriteStream;
+		// 	readonly prototype: InMemoryWriteStream;
+		// };
+
+
 		//////////////////////////////////////////////////////
 		// Async Lock
 		//////////////////////////////////////////////////////
@@ -213,6 +253,35 @@ declare global {
 		export const AsyncLock: {
 			new(): AsyncLock;
 			readonly prototype: AsyncLock;
+		};
+
+		//////////////////////////////////////////////////////
+		// URL Parser
+		//////////////////////////////////////////////////////
+		export interface URLData {
+			scheme: string;
+			host: string;
+			port: string;
+			path: string;
+			query: string;
+			fragment: string;
+		}
+
+		export interface URL extends URLData {
+			queries(): URLQueries;
+			toString(): string;
+		}
+		export const URL: {
+			new(data: string | URLData): URL;
+			readonly prototype: URL;
+		};
+
+		export interface URLQueries extends StringMap {
+			toString(): string;
+		}
+		export const URLQueries: {
+			new(data?: string | StringMapInit | nul): URLQueries;
+			readonly prototype: URLQueries;
 		};
 
 		//////////////////////////////////////////////////////
