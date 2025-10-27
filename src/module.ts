@@ -19,8 +19,6 @@ import WriteStream from "./io/WriteStream.js";
 import TreeMap from "./utils/TreeMap.js";
 import ArrayMap from "./utils/ArrayMap.js";
 import Path from "./utils/Path.js";
-import FSMap from "./fs/FSMap.js";
-import FileSystem from "./fs/FileSystem.js";
 import hmac_sha256 from "./utils/hmac_sha256.js";
 import Sha256Stream from "./hash/Sha256Stream.js";
 import HashStream from "./hash/HashStream.js";
@@ -41,7 +39,6 @@ const module: Omit<NettleWeb, "NettleWeb" | "loadModule" | "removeModule" | "act
 	NTON: NTON,
 	ASCII: ASCII,
 	UTF_8: UTF_8,
-	FSMap: FSMap,
 	sha256: sha256,
 	Base32: Base32,
 	Base64: Base64,
@@ -59,7 +56,6 @@ const module: Omit<NettleWeb, "NettleWeb" | "loadModule" | "removeModule" | "act
 	StringMap: StringMap,
 	AsyncLock: AsyncLock,
 	URLQueries: URLQueries,
-	FileSystem: FileSystem,
 	ReadStream: ReadStream,
 	WriteStream: WriteStream,
 	hmac_sha256: hmac_sha256,

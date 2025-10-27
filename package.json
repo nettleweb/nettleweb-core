@@ -5,8 +5,8 @@
 	"version": "0.3.1",
 	"homepage": "https://github.com/nettleweb/nettleweb-core",
 	"description": "The core JavaScript support framework used by NettleWeb projects.",
-	"main": "main.js",
 	"type": "module",
+	"main": "main.cjs",
 	"types": "./types/types.d.ts",
 	"files": [
 		"/out/",
@@ -15,6 +15,12 @@
 		"main.js",
 		"package.json"
 	],
+	"module": "main.js",
+	"exports": {
+		"types": "./types/types.d.ts",
+		"import": "./main.js",
+		"require": "./main.cjs"
+	},
 	"bugs": {
 		"url": "https://github.com/nettleweb/nettleweb-core/issues",
 		"email": "support@nettleweb.com"
@@ -28,7 +34,7 @@
 		"url": "git+https://github.com/nettleweb/nettleweb-core.git"
 	},
 	"devDependencies": {
-		"typescript": "^5.9.2"
+		"typescript": "^5.9.3"
 	},
 	"scripts": {
 		"build": "./scripts/build.sh"

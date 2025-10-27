@@ -184,7 +184,7 @@ declare global {
 			readAllBytes(charset?: nul): Promise<Buffer>;
 			readAllBytes(charset: Charset | string): Promise<string>;
 
-			/** 
+			/**
 			 * @abstract - Must override in subclasses
 			 * @protected - Should not be invoked directly
 			 */
@@ -202,7 +202,7 @@ declare global {
 			writeln(buf: string, charset?: Charset | string | nul, lineEnd?: string | nul): Promise<void>;
 			writeln(buf: Buffer, off?: number | nul, len?: number | nul, lineEnd?: string | nul): Promise<void>;
 
-			/** 
+			/**
 			 * @abstract - Must override in subclasses
 			 * @protected - Should not be invoked directly
 			 */
@@ -212,35 +212,6 @@ declare global {
 			new(): WriteStream;
 			readonly prototype: WriteStream;
 		};
-
-		// Proposed New Apis
-
-		// export interface PassThroughStream extends WriteStream {
-		// 	readonly readStream: ReadStream;
-		// }
-		// export const PassThroughStream: {
-		// 	new(): PassThroughStream;
-		// 	readonly prototype: PassThroughStream;
-		// };
-
-		// export interface InMemoryReadStream extends ReadStream {
-		// 	buffer: NettleWeb.Buffer;
-		// 	offset: number;
-		// }
-		// export const InMemoryReadStream: {
-		// 	new(buffer: NettleWeb.Buffer): InMemoryReadStream;
-		// 	readonly prototype: InMemoryReadStream;
-		// };
-
-		// export interface InMemoryWriteStream {
-		// 	reset(): void;
-		// 	buffer(): Buffer;
-		// }
-		// export const InMemoryWriteStream: {
-		// 	new(): InMemoryWriteStream;
-		// 	readonly prototype: InMemoryWriteStream;
-		// };
-
 
 		//////////////////////////////////////////////////////
 		// Async Lock
@@ -282,52 +253,6 @@ declare global {
 		export const URLQueries: {
 			new(data?: string | StringMapInit | nul): URLQueries;
 			readonly prototype: URLQueries;
-		};
-
-		//////////////////////////////////////////////////////
-		// File System
-		//////////////////////////////////////////////////////
-		export interface FSMap extends AsyncMap<string, Buffer> {
-			readonly persistent: boolean;
-		}
-		export const FSMap: {
-			new(): FSMap;
-			readonly prototype: FSMap;
-		};
-
-		export interface FileInfo {
-			[k: string]: any; // internal attributes
-			name: string;
-			path: string;
-			size: number;
-			chunks: number;
-			isSymlink: boolean;
-			isDirectory: boolean;
-			lastModified: number;
-		}
-
-		export interface FileSystem {
-			list(path: string): Promise<string[]>;
-			copy(src: string, dest: string): Promise<void>;
-			move(src: string, dest: string): Promise<void>;
-			link(src: string, dest: string): Promise<void>;
-			read(path: string): Promise<Buffer>;
-			mkdir(path: string): Promise<void>;
-			write(path: string, data: Buffer): Promise<void>;
-			append(path: string, data: Buffer): Promise<void>;
-			delete(path: string): Promise<void>;
-			exists(path: string): Promise<boolean>;
-			getInfo(path: string): Promise<FileInfo | null>;
-			isRegular(path: string): Promise<boolean>;
-			isSymlink(path: string): Promise<boolean>;
-			isDirectory(path: string): Promise<boolean>;
-			subFileSystem(root: string): FileSystem;
-			createReadStream(path: string, start?: number | nul): ReadStream;
-			createWriteStream(path: string, append?: boolean | nul): WriteStream;
-		}
-		export const FileSystem: {
-			new(storage?: FSMap | nul): FileSystem;
-			readonly prototype: FileSystem;
 		};
 
 		//////////////////////////////////////////////////////
