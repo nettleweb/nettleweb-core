@@ -56,7 +56,8 @@ DESC.value = () => {
 	return keys;
 }; defineProp("activeModules", DESC);
 
-DESC.value = module; defineProp("NettleWeb", DESC);
+DESC.value = true; defineProp("__esModule", DESC);
+DESC.value = module; defineProp("NettleWeb", DESC); defineProp("default", DESC);
 DESC.value = "NettleWeb"; defineProp(Symbol.toStringTag, DESC);
 
 

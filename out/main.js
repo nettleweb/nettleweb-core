@@ -48,8 +48,11 @@ DESC.value = () => {
     return keys;
 };
 defineProp("activeModules", DESC);
+DESC.value = true;
+defineProp("__esModule", DESC);
 DESC.value = module;
 defineProp("NettleWeb", DESC);
+defineProp("default", DESC);
 DESC.value = "NettleWeb";
 defineProp(Symbol.toStringTag, DESC);
 // ! IMPORTANT: Redefine all built-in members as non-configurable to avoid issues when interacting
