@@ -1,10 +1,14 @@
-import WriteStream from "../io/WriteStream.js";
+import Stream from "../io/Stream.js";
+import { bufferMerge, emptyBuffer } from "../misc/misc.js";
 const k = [0x5A827999, 0x6ED9EBA1, 0x8F1BBCDC, 0xCA62C1D6];
-export default class Sha1Stream extends WriteStream {
-    #h = [];
-    #buffer = [];
-    #totalBitsLow = 0;
-    #totalBitsHigh = 0;
+export default class Sha1Stream extends Stream {
+    #h;
+    #buffer;
+    #totalBitsLow;
+    #totalBitsHigh;
+    get canWrite() {
+        return true;
+    }
     get algorithm() {
         return "sha1";
     }
@@ -17,12 +21,11 @@ export default class Sha1Stream extends WriteStream {
     }
     reset() {
         this.#h = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0];
-        this.#buffer = [];
-        this.#totalBitsLow = 0;
-        this.#totalBitsHigh = 0;
+        this.#buffer = emptyBuffer;
+        this.#totalBitsLow = this.#totalBitsHigh = 0;
     }
     _write(input) {
-        const combined = [...this.#buffer, ...input];
+        const combined = bufferMerge(this.#buffer, input);
         const procSize = Math.floor(combined.length / 64) * 64;
         const addBits = procSize * 8;
         let newLow = this.#totalBitsLow + (addBits & 0xFFFFFFFF);
@@ -33,7 +36,7 @@ export default class Sha1Stream extends WriteStream {
         }
         this.#totalBitsHigh = newHigh & 0xFFFFFFFF;
         this.#totalBitsLow = newLow & 0xFFFFFFFF;
-        this.#buffer = combined.slice(procSize);
+        this.#buffer = combined.subarray(procSize);
         const w = new Uint32Array(80);
         const h = this.#h;
         for (let chunkStart = 0; chunkStart < procSize; chunkStart += 64) {
@@ -73,6 +76,7 @@ export default class Sha1Stream extends WriteStream {
             h[3] = (h[3] + d) >>> 0;
             h[4] = (h[4] + e) >>> 0;
         }
+        return input.length;
     }
     hash() {
         const buffer = this.#buffer;

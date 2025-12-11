@@ -1,8 +1,11 @@
-import WriteStream from "../io/WriteStream.js";
+import Stream from "../io/Stream.js";
 
-export default class HashStream extends WriteStream implements NettleWeb.HashStream {
-	#h: number[] = [];
+export default class HashStream extends Stream implements NettleWeb.HashStream {
+	#h: number[] | nul;
 
+	get canWrite(): boolean {
+		return true;
+	}
 	get algorithm(): string {
 		return "cyrb128";
 	}
@@ -15,9 +18,9 @@ export default class HashStream extends WriteStream implements NettleWeb.HashStr
 		this.reset();
 	}
 
-	_write(buf: NettleWeb.BufferView) {
+	_write(buf: NettleWeb.BufferView): number {
 		const len = buf.length;
-		const h = this.#h;
+		const h = this.#h!;
 
 		for (let i = 0; i < len; i++) {
 			const k = buf[i];
@@ -26,10 +29,12 @@ export default class HashStream extends WriteStream implements NettleWeb.HashStr
 			h[2] = h[3] ^ Math.imul(h[2] ^ k, 951274213);
 			h[3] = h[0] ^ Math.imul(h[3] ^ k, 2716044179);
 		}
+
+		return len;
 	}
 
 	hash(): number[] {
-		const h = this.#h;
+		const h = this.#h!;
 
 		h[0] = Math.imul(h[2] ^ (h[0] >>> 18), 597399067);
 		h[1] = Math.imul(h[3] ^ (h[1] >>> 22), 2869860233);

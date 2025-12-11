@@ -14,8 +14,6 @@ import NTON from "./utils/NTON.js";
 import Charset, { ASCII, UTF16BE, UTF16LE, UTF32BE, UTF32LE, UTF_8 } from "./coder/Charset.js";
 import sha256 from "./utils/sha256.js";
 import AES from "./utils/AES.js";
-import ReadStream from "./io/ReadStream.js";
-import WriteStream from "./io/WriteStream.js";
 import TreeMap from "./utils/TreeMap.js";
 import ArrayMap from "./utils/ArrayMap.js";
 import Path from "./utils/Path.js";
@@ -28,6 +26,8 @@ import HmacSha256Stream from "./hash/HmacSha256Stream.js";
 import StringMap from "./utils/StringMap.js";
 import URL from "./utils/URL.js";
 import URLQueries from "./utils/URLQueries.js";
+import EmptyStream from "./io/EmptyStream.js";
+import QueuedStream from "./io/QueuedStream.js";
 const module = {
     md5: md5,
     AES: AES,
@@ -55,9 +55,9 @@ const module = {
     StringMap: StringMap,
     AsyncLock: AsyncLock,
     URLQueries: URLQueries,
-    ReadStream: ReadStream,
-    WriteStream: WriteStream,
     hmac_sha256: hmac_sha256,
+    EmptyStream: EmptyStream,
+    QueuedStream: QueuedStream,
     EventEmitter: EventEmitter,
     SecureRandom: SecureRandom,
     HashStream: HashStream,

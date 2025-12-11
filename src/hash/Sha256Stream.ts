@@ -1,4 +1,5 @@
-import WriteStream from "../io/WriteStream.js";
+import Stream from "../io/Stream.js";
+import { bufferMerge, emptyBuffer } from "../misc/misc.js";
 
 const k: number[] = [
 	0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
@@ -11,12 +12,15 @@ const k: number[] = [
 	0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
 ];
 
-export default class Sha256Stream extends WriteStream implements NettleWeb.Sha256Stream {
-	#h: number[] = [];
-	#buffer: number[] = [];
-	#totalBitsLow: number = 0;
-	#totalBitsHigh: number = 0;
+export default class Sha256Stream extends Stream implements NettleWeb.Sha256Stream {
+	#h: number[] | nul;
+	#buffer: NettleWeb.Buffer | nul;
+	#totalBitsLow: number | nul;
+	#totalBitsHigh: number | nul;
 
+	get canWrite(): boolean {
+		return true;
+	}
 	get algorithm(): string {
 		return "sha256";
 	}
@@ -31,17 +35,17 @@ export default class Sha256Stream extends WriteStream implements NettleWeb.Sha25
 
 	reset() {
 		this.#h = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];
-		this.#buffer = [];
+		this.#buffer = emptyBuffer;
 		this.#totalBitsLow = this.#totalBitsHigh = 0;
 	}
 
-	_write(input: NettleWeb.Buffer | number[]) {
-		const combined = [...this.#buffer, ...input];
+	_write(input: NettleWeb.BufferView): number {
+		const combined = bufferMerge(this.#buffer!, input);
 		const procSize = Math.floor(combined.length / 64) * 64;
 		const addBits = procSize * 8;
 
-		let newLow = this.#totalBitsLow + (addBits & 0xFFFFFFFF);
-		let newHigh = this.#totalBitsHigh + Math.floor(addBits / 0x100000000);
+		let newLow = this.#totalBitsLow! + (addBits & 0xFFFFFFFF);
+		let newHigh = this.#totalBitsHigh! + Math.floor(addBits / 0x100000000);
 
 		if (newLow > 0xFFFFFFFF) {
 			newHigh += Math.floor(newLow / 0x100000000);
@@ -50,10 +54,10 @@ export default class Sha256Stream extends WriteStream implements NettleWeb.Sha25
 
 		this.#totalBitsHigh = newHigh & 0xFFFFFFFF;
 		this.#totalBitsLow = newLow & 0xFFFFFFFF;
-		this.#buffer = combined.slice(procSize);
+		this.#buffer = combined.subarray(procSize);
 
 		const w = new Uint32Array(64);
-		const h = this.#h;
+		const h = this.#h!;
 
 		for (let chunkStart = 0; chunkStart < procSize; chunkStart += 64) {
 			for (let i = 0; i < 16; i++) {
@@ -85,14 +89,16 @@ export default class Sha256Stream extends WriteStream implements NettleWeb.Sha25
 			h[3] = (h[3] + d) >>> 0; h[4] = (h[4] + e) >>> 0; h[5] = (h[5] + f) >>> 0;
 			h[6] = (h[6] + g) >>> 0; h[7] = (h[7] + hVal) >>> 0;
 		}
+
+		return input.length;
 	}
 
 	hash(): number[] {
-		const buffer = this.#buffer;
+		const buffer = this.#buffer!;
 		const bufLen = buffer.length;
 
-		let totalBitsLow = this.#totalBitsLow + (bufLen * 8);
-		let totalBitsHigh = this.#totalBitsHigh;
+		let totalBitsLow = this.#totalBitsLow! + (bufLen * 8);
+		let totalBitsHigh = this.#totalBitsHigh!;
 
 		if (totalBitsLow > 0xFFFFFFFF) {
 			totalBitsHigh += (totalBitsLow / 0x100000000) | 0;
@@ -116,7 +122,7 @@ export default class Sha256Stream extends WriteStream implements NettleWeb.Sha25
 		padding[padLen - 1] = totalBitsLow & 0xFF;
 
 		const w = new Uint32Array(64);
-		const h = this.#h;
+		const h = this.#h!;
 
 		for (let chunkStart = 0; chunkStart < padLen; chunkStart += 64) {
 			for (let i = 0; i < 16; i++) {
@@ -156,7 +162,7 @@ export default class Sha256Stream extends WriteStream implements NettleWeb.Sha25
 			result[p++] = (hVal >>> 16) & 0xFF;
 			result[p++] = (hVal >>> 8) & 0xFF;
 			result[p++] = hVal & 0xFF;
-		} 
+		}
 
 		this.reset();
 		return result;

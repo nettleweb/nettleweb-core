@@ -1,7 +1,7 @@
 export const ITER_FUNC = Array.prototype[Symbol.iterator];
 export const DEFAULT_CMP = (a, b) => a < b ? -1 : a > b ? 1 : 0;
-export const emptyBuffer = new Uint8Array(new ArrayBuffer(0), 0, 0);
-export const singleBuffer = new Uint8Array(new ArrayBuffer(1), 0, 1);
+export const emptyBuffer = new Uint8Array(0);
+export const singleBuffer = new Uint8Array(1);
 export function initCounter(state) {
     if (state == null) {
         const arr = new Array(16);
@@ -34,6 +34,13 @@ export function incrCounter(counter) {
             counter[i] = 0;
     }
 }
+export function isBuffer(obj) {
+    if (ArrayBuffer.isView(obj)) {
+        const tag = obj[Symbol.toStringTag];
+        return tag === "Uint8Array" || tag === "Buffer";
+    }
+    return false;
+}
 export function isArrayBuffer(obj) {
     try {
         new DataView(obj, 0, 0);
@@ -43,44 +50,25 @@ export function isArrayBuffer(obj) {
         return false;
     }
 }
-export function bufferFrom(data, mapFn) {
-    if (data == null || typeof data !== "object")
-        throw new Error("INvalid buffer source");
-    if (isArrayBuffer(data)) {
-        const buf = new Uint8Array(data);
-        if (mapFn != null) {
-            for (let i = 0; i < buf.byteLength; i++)
-                buf[i] = mapFn(buf[i], i);
-        }
-        return buf;
-    }
-    else if (ArrayBuffer.isView(data)) {
-        const buf = new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
-        if (mapFn != null) {
-            for (let i = 0; i < buf.byteLength; i++)
-                buf[i] = mapFn(buf[i], i);
-        }
-        return buf;
-    }
-    else
-        return Uint8Array.from(data, mapFn || void 0);
+export function bufferMerge(b1, b2) {
+    const offset = b1.length;
+    const buffer = new Uint8Array(offset + b2.length);
+    buffer.set(b1, 0);
+    buffer.set(b2, offset);
+    return buffer;
 }
 export function bufferConcat(data, length) {
-    if (data == null || typeof data !== "object")
-        throw new Error("Invalid buffer data");
-    if (!Array.isArray(data))
-        data = Array.from(data);
     if (typeof length !== "number" || length < 0) {
         length = 0;
-        for (const { byteLength } of data)
-            length += byteLength;
+        for (const e of data)
+            length += e.length;
     }
     const buffer = new Uint8Array(length);
     let offset = 0;
     for (const e of data) {
-        const len = e.byteLength;
-        buffer.set("length" in e ? e : new Uint8Array("buffer" in e ? e.buffer : e, e.byteOffset || 0, len), offset);
-        offset += len;
+        const length = e.length;
+        buffer.set(e, offset);
+        offset += length;
     }
     return buffer;
 }

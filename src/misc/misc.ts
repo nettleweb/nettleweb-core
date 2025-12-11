@@ -1,8 +1,8 @@
 export const ITER_FUNC = Array.prototype[Symbol.iterator];
 export const DEFAULT_CMP = (a: any, b: any) => a < b ? -1 : a > b ? 1 : 0
 
-export const emptyBuffer = new Uint8Array(new ArrayBuffer(0), 0, 0);
-export const singleBuffer = new Uint8Array(new ArrayBuffer(1), 0, 1);
+export const emptyBuffer = new Uint8Array(0);
+export const singleBuffer = new Uint8Array(1);
 
 export function initCounter(state?: NettleWeb.CounterInit | nul): number[] {
 	if (state == null) {
@@ -37,6 +37,14 @@ export function incrCounter(counter: number[]) {
 	}
 }
 
+export function isBuffer(obj: any): obj is Uint8Array {
+	if (ArrayBuffer.isView(obj)) {
+		const tag = (obj as any)[Symbol.toStringTag];
+		return tag === "Uint8Array" || tag === "Buffer";
+	}
+	return false;
+}
+
 export function isArrayBuffer(obj: any): obj is ArrayBuffer {
 	try {
 		new DataView(obj, 0, 0);
@@ -46,47 +54,29 @@ export function isArrayBuffer(obj: any): obj is ArrayBuffer {
 	}
 }
 
-export function bufferFrom(data: NettleWeb.BufferSource, mapFn?: ((v: any, k: number) => number) | nul): NettleWeb.Buffer {
-	if (data == null || typeof data !== "object")
-		throw new Error("INvalid buffer source");
-
-	if (isArrayBuffer(data)) {
-		const buf = new Uint8Array(data);
-		if (mapFn != null) {
-			for (let i = 0; i < buf.byteLength; i++)
-				buf[i] = mapFn(buf[i], i);
-		}
-		return buf;
-	} else if (ArrayBuffer.isView(data)) {
-		const buf = new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
-		if (mapFn != null) {
-			for (let i = 0; i < buf.byteLength; i++)
-				buf[i] = mapFn(buf[i], i);
-		}
-		return buf;
-	} else return Uint8Array.from(data as any, mapFn || void 0);
+export function bufferMerge(b1: NettleWeb.BufferView, b2: NettleWeb.BufferView): NettleWeb.Buffer {
+	const offset = b1.length;
+	const buffer = new Uint8Array(offset + b2.length);
+	buffer.set(b1, 0);
+	buffer.set(b2, offset);
+	return buffer;
 }
 
-export function bufferConcat(data: NettleWeb.BufferData[], length?: number | nul): NettleWeb.Buffer {
-	if (data == null || typeof data !== "object")
-		throw new Error("Invalid buffer data");
-	if (!Array.isArray(data))
-		data = Array.from(data);
-
+export function bufferConcat(data: Iterable<NettleWeb.BufferView>, length?: number | nul): NettleWeb.Buffer {
 	if (typeof length !== "number" || length < 0) {
 		length = 0;
 
-		for (const { byteLength } of data)
-			length += byteLength;
+		for (const e of data)
+			length += e.length;
 	}
 
 	const buffer = new Uint8Array(length);
 	let offset: number = 0;
 
 	for (const e of data) {
-		const len = e.byteLength;
-		buffer.set("length" in e ? e : new Uint8Array("buffer" in e ? e.buffer : e, (e as any).byteOffset || 0, len), offset);
-		offset += len;
+		const length = e.length;
+		buffer.set(e, offset);
+		offset += length;
 	}
 
 	return buffer;

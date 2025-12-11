@@ -18,7 +18,7 @@ const gg = (a, b, c, d, x, s, t) => cm((b & d) | (c & (~d)), a, b, x, s, t);
 const hh = (a, b, c, d, x, s, t) => cm(b ^ c ^ d, a, b, x, s, t);
 const ii = (a, b, c, d, x, s, t) => cm(c ^ (b | (~d)), a, b, x, s, t);
 export default function md5(data) {
-    const msg = Array.from(typeof data === "string" ? encodeUTF8(data) : data);
+    const msg = typeof data === "string" ? encodeUTF8(data) : data;
     const msglen = msg.length;
     const length = (((msglen + 8) >> 6) + 1) * 16;
     const array = new Array(length).fill(0);

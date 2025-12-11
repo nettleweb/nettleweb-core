@@ -8,11 +8,6 @@ declare global {
 	export type NettleWeb = typeof NettleWeb & { readonly NettleWeb: NettleWeb; };
 	export type globalThis = typeof globalThis & { readonly NettleWeb: NettleWeb };
 
-	export module globalThis {
-		export var window: globalThis;
-		export var globalThis: globalThis;
-	}
-
 	export module NettleWeb {
 		export const NettleWeb: NettleWeb;
 
@@ -26,7 +21,6 @@ declare global {
 		export interface Null {
 		}
 		export const Null: {
-			(): Null;
 			new(): Null;
 			readonly prototype: Null;
 		};
@@ -49,17 +43,6 @@ declare global {
 			keys(): K[];
 			values(): V[];
 			entries(): [K, V][];
-		}
-		export interface AsyncMap<K, V> {
-			has(key: K): Promise<boolean>;
-			get(key: K): Promise<V | null>;
-			set(key: K, value: V): Promise<void>;
-			clear(): Promise<void>;
-			delete(key: K): Promise<boolean>;
-
-			keys(): Promise<K[]>;
-			values(): Promise<V[]>;
-			entries(): Promise<[K, V][]>;
 		}
 
 		export interface TreeMap<K, V> extends MapLike<K, V>, Iterable<[K, V]> {
@@ -90,8 +73,6 @@ declare global {
 		// Buffer
 		//////////////////////////////////////////////////////
 		export type BufferView = Buffer | number[] | ArrayLike<number>;
-		export type BufferData = Buffer | ArrayBufferLike | ArrayBufferView;
-		export type BufferSource = Iterable<number> | ArrayLike<number> | BufferData;
 
 		export interface Buffer extends Uint8Array, Iterable<number>, ArrayLike<number> {
 			readonly length: number;
@@ -102,8 +83,8 @@ declare global {
 			readonly prototype: Buffer;
 			readonly emptyBuffer: Buffer;
 
-			from(data: BufferSource, mapFn?: ((v: any, k: number) => number) | nul): Buffer;
-			concat(data: Iterable<BufferData> | ArrayLike<BufferData>, length?: number | nul): Buffer;
+			merge(b1: BufferView, b2: BufferView): Buffer;
+			concat(data: Iterable<BufferView>, length?: number | nul): Buffer;
 			isBuffer(obj: any): obj is Buffer;
 			isArrayBuffer(obj: any): obj is ArrayBufferLike;
 		};
@@ -155,62 +136,60 @@ declare global {
 		//////////////////////////////////////////////////////
 		// Streams
 		/////////////////////////////////////////////////////
-		export interface Closeable {
-			close(): Promise<void>;
-		}
-		export interface Flushable {
-			flush(): Promise<void>;
-		}
-
-		export interface Stream extends Closeable {
+		export interface Stream {
 			readonly closed: boolean;
+			/** @abstract */
 			readonly canRead: boolean;
+			/** @abstract */
 			readonly canWrite: boolean;
-			generator(chunkSize?: number | nul): AsyncGenerator<Buffer>;
-		}
-		export const Stream: {
-			new(canRead?: boolean | nul, canWrite?: boolean | nul): Stream;
-			readonly prototype: Stream;
-		};
 
-		export interface ReadStream extends Stream {
-			pipe(out: WriteStream, close?: boolean | nul): Promise<number>;
+			/** @abstract */
+			_read(buf: Buffer): Awaitable<number>;
+			/** @abstract */
+			_write(buf: Buffer): Awaitable<number>;
+			/** @abstract */
+			_flush(): Awaitable<void>;
+			/** @abstract */
+			_close(): Awaitable<void>;
+
 			read(): Promise<number>;
 			read(buf: Buffer, off?: number | nul, len?: number | nul): Promise<number>;
-			readLine(charset?: nul, lineSep?: string | nul): Promise<Buffer>;
-			readLine(charset: Charset | string, lineSep?: string | nul): Promise<string>;
+			readLine(charset?: nul, lineSep?: string | BufferView | nul): Promise<Buffer>;
+			readLine(charset: Charset | string, lineSep?: string | BufferView | nul): Promise<string>;
 			readNBytes(n: number, charset?: nul): Promise<Buffer>;
 			readNBytes(n: number, charset: Charset | string): Promise<string>;
 			readAllBytes(charset?: nul): Promise<Buffer>;
 			readAllBytes(charset: Charset | string): Promise<string>;
 
-			/**
-			 * @abstract - Must override in subclasses
-			 * @protected - Should not be invoked directly
-			 */
-			_read(buf: Buffer): Awaitable<number>;
-		}
-		export const ReadStream: {
-			new(): ReadStream;
-			readonly prototype: ReadStream;
-		};
-
-		export interface WriteStream extends Stream, Flushable {
 			write(b: number): Promise<void>;
 			write(buf: string, charset?: Charset | string | nul): Promise<void>;
 			write(buf: Buffer, off?: number | nul, len?: number | nul): Promise<void>;
 			writeln(buf: string, charset?: Charset | string | nul, lineEnd?: string | nul): Promise<void>;
 			writeln(buf: Buffer, off?: number | nul, len?: number | nul, lineEnd?: string | nul): Promise<void>;
 
-			/**
-			 * @abstract - Must override in subclasses
-			 * @protected - Should not be invoked directly
-			 */
-			_write(buf: Buffer): Awaitable<void>;
+			pipe(out: Stream, flush?: boolean | nul, close?: boolean | nul): Promise<number>;
+			flush(): Promise<void>;
+			close(): Promise<void>;
+			generator(chunkSize?: number | nul): AsyncGenerator<Buffer>;
 		}
-		export const WriteStream: {
-			new(): WriteStream;
-			readonly prototype: WriteStream;
+		export const Stream: {
+			new(): Stream;
+			readonly prototype: Stream;
+		};
+
+		export interface EmptyStream extends Stream {
+		}
+		export const EmptyStream: {
+			new(read?: boolean | nul, write?: boolean | nul): EmptyStream;
+			readonly prototype: EmptyStream;
+		};
+
+		export interface QueuedStream extends Stream {
+			enqueue(buf: Buffer | null): void;
+		}
+		export const QueuedStream: {
+			new(): QueuedStream;
+			readonly prototype: QueuedStream;
 		};
 
 		//////////////////////////////////////////////////////
@@ -333,11 +312,11 @@ declare global {
 		//////////////////////////////////////////////////////
 		// Hash Functions
 		//////////////////////////////////////////////////////
-		export interface HashStream extends WriteStream {
+		export interface HashStream extends Stream {
 			readonly algorithm: string;
 			readonly hashLength: number;
 
-			_write(buf: BufferView): void;
+			_write(buf: BufferView): number;
 			hash(): number[];
 			reset(): void;
 		}

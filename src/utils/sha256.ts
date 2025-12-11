@@ -5,9 +5,7 @@ export default function sha256(data: string | NettleWeb.BufferView): string {
 	const stream = new Sha256Stream();
 	if (typeof data === "string")
 		data = encodeUTF8(data);
-	if (!(Symbol.iterator in data))
-		data = Uint8Array.from(data);
 
-	stream._write(data as any);
+	stream._write(data);
 	return encodeHex(stream.hash());
 }

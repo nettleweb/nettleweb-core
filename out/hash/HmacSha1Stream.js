@@ -1,9 +1,12 @@
-import WriteStream from "../io/WriteStream.js";
+import Stream from "../io/Stream.js";
 import Sha1Stream from "./Sha1Stream.js";
-export default class HmacSha1Stream extends WriteStream {
+export default class HmacSha1Stream extends Stream {
     #base;
     #k_xor_ipad;
     #k_xor_opad;
+    get canWrite() {
+        return true;
+    }
     get algorithm() {
         return "hmac-sha1";
     }
@@ -25,7 +28,7 @@ export default class HmacSha1Stream extends WriteStream {
         this.#k_xor_opad = k_xor_opad;
     }
     _write(buf) {
-        this.#base._write(buf);
+        return this.#base._write(buf);
     }
     hash() {
         const base = this.#base;

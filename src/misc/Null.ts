@@ -1,3 +1,5 @@
+import { defProp } from "./objutil.js";
+
 const Null: typeof NettleWeb.Null = Object.setPrototypeOf(function __struct__(this: unknown) {
 	if (typeof new.target === "function") {
 		for (let p = Object.getPrototypeOf(this); p != null; p = Object.getPrototypeOf(p)) {
@@ -5,16 +7,8 @@ const Null: typeof NettleWeb.Null = Object.setPrototypeOf(function __struct__(th
 				delete p["constructor"];
 			} catch (err) { }
 		}
-	} else return Object.create(NullProto);
+	}
 }, null);
 
-export const NullProto = Object.freeze(Object.create(null));
-
-Object.defineProperty(Null, "prototype", {
-	value: NullProto,
-	writable: false,
-	enumerable: false,
-	configurable: false
-});
-
+defProp(Null, "prototype", Object.freeze(Object.create(null)));
 export default Object.freeze(Null);

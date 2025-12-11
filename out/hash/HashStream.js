@@ -1,6 +1,9 @@
-import WriteStream from "../io/WriteStream.js";
-export default class HashStream extends WriteStream {
-    #h = [];
+import Stream from "../io/Stream.js";
+export default class HashStream extends Stream {
+    #h;
+    get canWrite() {
+        return true;
+    }
     get algorithm() {
         return "cyrb128";
     }
@@ -21,6 +24,7 @@ export default class HashStream extends WriteStream {
             h[2] = h[3] ^ Math.imul(h[2] ^ k, 951274213);
             h[3] = h[0] ^ Math.imul(h[3] ^ k, 2716044179);
         }
+        return len;
     }
     hash() {
         const h = this.#h;

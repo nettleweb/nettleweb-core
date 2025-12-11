@@ -1,11 +1,14 @@
-import WriteStream from "../io/WriteStream.js";
+import Stream from "../io/Stream.js";
 import Sha1Stream from "./Sha1Stream.js";
 
-export default class HmacSha1Stream extends WriteStream implements NettleWeb.HmacSha1Stream {
+export default class HmacSha1Stream extends Stream implements NettleWeb.HmacSha1Stream {
 	readonly #base: NettleWeb.HashStream;
 	readonly #k_xor_ipad: number[];
 	readonly #k_xor_opad: number[];
 
+	get canWrite(): boolean {
+		return true;
+	}
 	get algorithm(): string {
 		return "hmac-sha1";
 	}
@@ -31,8 +34,8 @@ export default class HmacSha1Stream extends WriteStream implements NettleWeb.Hma
 		this.#k_xor_opad = k_xor_opad;
 	}
 
-	_write(buf: NettleWeb.BufferView) {
-		this.#base._write(buf);
+	_write(buf: NettleWeb.BufferView): number {
+		return this.#base._write(buf);
 	}
 
 	hash(): number[] {
