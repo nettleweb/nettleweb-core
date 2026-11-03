@@ -237,7 +237,6 @@ declare global {
 		export namespace NTON {
 			export function encode(data: any): Buffer;
 			export function decode(data: Buffer): any;
-			export function validate(data: BufferView): boolean;
 		}
 
 		//////////////////////////////////////////////////////
