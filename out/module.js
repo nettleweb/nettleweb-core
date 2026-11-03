@@ -23,6 +23,7 @@ import StringMap from "./utils/StringMap.js";
 import URL from "./utils/URL.js";
 import URLQueries from "./utils/URLQueries.js";
 import { cyrb128, hmac_sha1, hmac_sha256, sha1, sha256 } from "./utils/hashmisc.js";
+import Base58 from "./coder/Base58.js";
 const module = {
     __proto__: null,
     md5: md5,
@@ -37,6 +38,7 @@ const module = {
     UTF_8: UTF_8,
     sha256: sha256,
     Base32: Base32,
+    Base58: Base58,
     Base64: Base64,
     Buffer: Buffer,
     Random: Random,

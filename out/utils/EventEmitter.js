@@ -1,4 +1,4 @@
-import { apply, ownKeys } from "../misc/intrinsics.js";
+import { apply, ownKeys, Set } from "../misc/intrinsics.js";
 import Null from "../misc/Null.js";
 export default class EventEmitter extends Null {
     #listeners = { __proto__: null };

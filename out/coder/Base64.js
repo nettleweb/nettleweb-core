@@ -1,66 +1,82 @@
 import { Array, freeze, Uint8Array } from "../misc/intrinsics.js";
+import { emptyBuffer } from "../misc/misc.js";
 const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 const lookup = new Uint8Array(256);
-for (let i = 0; i < 26; i++)
-    lookup[65 + i] = i; // A-Z
-for (let i = 0; i < 26; i++)
-    lookup[97 + i] = i + 26; // a-z
-for (let i = 0; i < 10; i++)
-    lookup[48 + i] = i + 52; // 0-9
-lookup[43] = 62;
-lookup[47] = 63;
-lookup[61] = 0;
+for (let i = 0; i < 64; i++)
+    lookup[chars.charCodeAt(i)] = i;
+export function encodeBase64(data) {
+    const len = data.length;
+    if (len === 0)
+        return "";
+    const outLen = (((len + 2) / 3) >>> 0) * 4;
+    const out = new Array(outLen);
+    let i = 0;
+    let j = 0;
+    const mainEnd = len - (len % 3);
+    while (i < mainEnd) {
+        const b0 = data[i++];
+        const b1 = data[i++];
+        const b2 = data[i++];
+        out[j++] = chars[b0 >> 2];
+        out[j++] = chars[((b0 & 0x03) << 4) | (b1 >> 4)];
+        out[j++] = chars[((b1 & 0x0f) << 2) | (b2 >> 6)];
+        out[j++] = chars[b2 & 0x3f];
+    }
+    const rem = len - mainEnd;
+    if (rem === 1) {
+        const b0 = data[i];
+        out[j++] = chars[b0 >> 2];
+        out[j++] = chars[(b0 & 0x03) << 4];
+        out[j++] = "=";
+        out[j++] = "=";
+    }
+    else if (rem === 2) {
+        const b0 = data[i++];
+        const b1 = data[i];
+        out[j++] = chars[b0 >> 2];
+        out[j++] = chars[((b0 & 0x03) << 4) | (b1 >> 4)];
+        out[j++] = chars[(b1 & 0x0f) << 2];
+        out[j++] = "=";
+    }
+    return out.join("");
+}
+export function decodeBase64(data) {
+    const len = data.length;
+    if (len === 0)
+        return emptyBuffer;
+    let padding = 0;
+    if (data.charCodeAt(len - 1) === 61)
+        padding++;
+    if (data.charCodeAt(len - 2) === 61)
+        padding++;
+    const outLen = (((len * 3) / 4) >>> 0) - padding;
+    const out = new Uint8Array(outLen);
+    let i = 0;
+    let j = 0;
+    const limit = padding > 0 ? len - 4 : len;
+    while (i < limit) {
+        const c0 = lookup[data.charCodeAt(i++)];
+        const c1 = lookup[data.charCodeAt(i++)];
+        const c2 = lookup[data.charCodeAt(i++)];
+        const c3 = lookup[data.charCodeAt(i++)];
+        out[j++] = (c0 << 2) | (c1 >> 4);
+        out[j++] = ((c1 & 0x0f) << 4) | (c2 >> 2);
+        out[j++] = ((c2 & 0x03) << 6) | c3;
+    }
+    if (padding > 0) {
+        const c0 = lookup[data.charCodeAt(i++)];
+        const c1 = lookup[data.charCodeAt(i++)];
+        out[j++] = (c0 << 2) | (c1 >> 4);
+        if (padding === 1) {
+            const c2 = lookup[data.charCodeAt(i++)];
+            out[j++] = ((c1 & 0x0f) << 4) | (c2 >> 2);
+        }
+    }
+    return out;
+}
 const Base64 = {
     __proto__: null,
-    encode: (data) => {
-        const length = data.length;
-        const output = new Array(((length / 3) >>> 0) * 4 + (length % 3 ? 4 : 0));
-        let i = 0, j = 0;
-        while (i < length - 2) {
-            const n = (data[i] << 16) | (data[i + 1] << 8) | data[i + 2];
-            output[j] = chars[(n >>> 18) & 0x3F];
-            output[j + 1] = chars[(n >>> 12) & 0x3F];
-            output[j + 2] = chars[(n >>> 6) & 0x3F];
-            output[j + 3] = chars[n & 0x3F];
-            i += 3;
-            j += 4;
-        }
-        if (i < length) {
-            const a = data[i];
-            const b = i + 1 < length ? data[i + 1] : 0;
-            const n = (a << 16) | (b << 8);
-            output[j] = chars[(n >>> 18) & 0x3F];
-            output[j + 1] = chars[(n >>> 12) & 0x3F];
-            output[j + 2] = i + 1 < length ? chars[(n >>> 6) & 0x3F] : "=";
-            output[j + 3] = "=";
-        }
-        return output.join("");
-    },
-    decode: (data) => {
-        const len = data.length;
-        let pad = 0;
-        if (data[len - 1] === "=")
-            pad++;
-        if (data[len - 2] === "=")
-            pad++;
-        const outLen = ((len * 3) >>> 2) - pad;
-        const output = new Uint8Array(outLen);
-        let i = 0, j = 0;
-        while (i < len) {
-            const a = lookup[data.charCodeAt(i)];
-            const b = lookup[data.charCodeAt(i + 1)];
-            const c = lookup[data.charCodeAt(i + 2)];
-            const d = lookup[data.charCodeAt(i + 3)];
-            const n = (a << 18) | (b << 12) | (c << 6) | d;
-            output[j] = (n >>> 16) & 0xFF;
-            if (j + 1 < outLen)
-                output[j + 1] = (n >>> 8) & 0xFF;
-            if (j + 2 < outLen)
-                output[j + 2] = n & 0xFF;
-            i += 4;
-            j += 3;
-        }
-        return output;
-    }
+    encode: encodeBase64,
+    decode: decodeBase64
 };
 export default freeze(Base64);

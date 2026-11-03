@@ -1,4 +1,5 @@
 import { encodeUTF8 } from "../coder/Charset.js";
+import { Array } from "../misc/intrinsics.js";
 const hc = "0123456789abcdef";
 const rh = (n) => {
     let s = "";

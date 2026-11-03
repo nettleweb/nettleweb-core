@@ -222,6 +222,10 @@ declare global {
 			export function encode(data: BufferView): string;
 			export function decode(data: string): Buffer;
 		}
+		export namespace Base58 {
+			export function encode(data: BufferView): string;
+			export function decode(data: string): Buffer;
+		}
 		export namespace Base64 {
 			export function encode(data: BufferView): string;
 			export function decode(data: string): Buffer;

@@ -1,3 +1,4 @@
+import { Array } from "../misc/intrinsics.js";
 import Null from "../misc/Null.js";
 export default class ArrayMap extends Null {
     #entries;

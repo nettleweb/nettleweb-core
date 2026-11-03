@@ -2,43 +2,59 @@ import { Array, defineProperty, Error, freeze, fromCharCode, fromCodePoint, Uint
 import Null from "../misc/Null.js";
 
 export function encodeUTF8(data: string): NettleWeb.Buffer {
-	const bytes: number[] = [];
+	const len = data.length;
+	const buf = new Uint8Array(len * 3);
+	let off = 0;
 
-	for (const ch of data) {
-		const cp = ch.codePointAt(0) || 0;
-		if (cp < 0x80)
-			bytes.push(cp);
-		else if (cp < 0x800)
-			bytes.push((cp >> 6) | 0xc0, (cp & 0x3f) | 0x80);
-		else if (cp < 0x10000)
-			bytes.push((cp >> 12) | 0xe0, ((cp >> 6) & 0x3f) | 0x80, (cp & 0x3f) | 0x80);
-		else // Surrogate pair, cp < 0x110000
-			bytes.push((cp >> 18) | 0xf0, ((cp >> 12) & 0x3f) | 0x80, ((cp >> 6) & 0x3f) | 0x80, (cp & 0x3f) | 0x80);
+	for (let i = 0; i < len; i++) {
+		let c = data.charCodeAt(i);
+		if (c < 0x80) {
+			buf[off++] = c;
+		} else if (c < 0x800) {
+			buf[off++] = 0xc0 | (c >> 6);
+			buf[off++] = 0x80 | (c & 0x3f);
+		} else if (c < 0xd800 || c > 0xdfff) {
+			buf[off++] = 0xe0 | (c >> 12);
+			buf[off++] = 0x80 | ((c >> 6) & 0x3f);
+			buf[off++] = 0x80 | (c & 0x3f);
+		} else { // Surrogate pair (4 bytes)
+			i++;
+			c = 0x10000 + (((c & 0x3ff) << 10) | (data.charCodeAt(i) & 0x3ff));
+			buf[off++] = 0xf0 | (c >> 18);
+			buf[off++] = 0x80 | ((c >> 12) & 0x3f);
+			buf[off++] = 0x80 | ((c >> 6) & 0x3f);
+			buf[off++] = 0x80 | (c & 0x3f);
+		}
 	}
 
-	return Uint8Array.from(bytes);
+	return buf.subarray(0, off);
 }
 
 export function decodeUTF8(data: NettleWeb.BufferView): string {
 	const len = data.length;
-	let str: string = "";
+	const out = new Array(len);
+	let off = 0;
+	let i = 0;
 
-	for (let i = 0; i < len;) {
+	while (i < len) {
 		const b1 = data[i++];
-
 		if ((b1 & 0x80) === 0)
-			str += String.fromCharCode(b1);
+			out[off++] = fromCharCode(b1);
 		else if ((b1 & 0xe0) === 0xc0)
-			str += String.fromCharCode(((b1 & 0x1f) << 6) | (data[i++] & 0x3f));
+			out[off++] = fromCharCode(((b1 & 0x1f) << 6) | (data[i++] & 0x3f));
 		else if ((b1 & 0xf0) === 0xe0)
-			str += String.fromCharCode(((b1 & 0x0f) << 12) | ((data[i++] & 0x3f) << 6) | (data[i++] & 0x3f));
+			out[off++] += fromCharCode(((b1 & 0x0f) << 12) | ((data[i++] & 0x3f) << 6) | (data[i++] & 0x3f));
 		else if ((b1 & 0xf8) === 0xf0) {
 			const cp = ((b1 & 0x07) << 18) | ((data[i++] & 0x3f) << 12) | ((data[i++] & 0x3f) << 6) | (data[i++] & 0x3f);
-			str += cp > 0x10ffff ? "\ufffd" : String.fromCodePoint(cp);
-		} else str += "\ufffd";
+			if (cp <= 0x10ffff) {
+				const m = cp - 0x10000;
+				out[off++] = fromCharCode(0xd800 + (m >> 10), 0xdc00 + (m & 0x3ff));
+			} else out[off++] = "\ufffd";
+		} else out[off++] = "\ufffd";
 	}
 
-	return str;
+	out.length = off;
+	return out.join("");
 }
 
 export function decodeUTF16BE(data: NettleWeb.BufferView, offset?: number | nul): string {
