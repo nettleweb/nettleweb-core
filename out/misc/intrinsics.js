@@ -1,7 +1,7 @@
 export const { sin, cos, tan, sinh, cosh, tanh, atan2, acos, asin, atan, asinh, acosh, atanh, abs, ceil, floor, round, max, min, exp, expm1, log, log1p, log2, log10, pow, sqrt, cbrt, sign, imul, random } = Math;
 export const { parse: jsonParse, stringify: jsonStringify, } = JSON;
 export const global = typeof globalThis === "object" ? globalThis : typeof window === "object" ? window : typeof self === "object" ? self : Function("return this;")();
-export const { Map, Set, Date, Array, Error, String, Number, Object, Symbol, Boolean, DataView, Uint8Array, Uint16Array, Uint32Array, ArrayBuffer, Float32Array, Float64Array, parseInt, parseFloat, encodeURIComponent, decodeURIComponent } = global;
+export const { Map, Set, Date, Array, Error, String, Number, Object, Symbol, Boolean, DataView, Int32Array, Uint8Array, Uint16Array, Uint32Array, ArrayBuffer, Float32Array, Float64Array, parseInt, parseFloat, encodeURIComponent, decodeURIComponent } = global;
 export const { keys: getProps, // rename to prevent conflict as 'keys' is a common identifier
 values: objValues, entries: objEntries, freeze, setPrototypeOf, getPrototypeOf, defineProperty, defineProperties, preventExtensions } = Object;
 export const { fromCharCode, fromCodePoint } = String;
@@ -27,7 +27,7 @@ export function isUint8Array(obj) {
     return false;
 }
 for (const e of [Map, Set, Date, Array, Error, String, Number, Object, Symbol, Boolean, DataView,
-    Uint8Array, Uint16Array, Uint32Array, ArrayBuffer, Float32Array, Float64Array]) {
+    Int32Array, Uint8Array, Uint16Array, Uint32Array, ArrayBuffer, Float32Array, Float64Array]) {
     freeze(e.prototype);
 }
 const _Function = global.Function;

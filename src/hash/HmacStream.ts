@@ -1,3 +1,4 @@
+import { Uint8Array } from "../misc/intrinsics.js";
 import Null from "../misc/Null.js";
 
 export default abstract class HmacStream extends Null implements NettleWeb.HashStream {

@@ -1,3 +1,4 @@
+import { Uint8Array } from "../misc/intrinsics.js";
 import Null from "../misc/Null.js";
 
 function arrayCopy(dst: NettleWeb.BufferLike, src: NettleWeb.BufferView, len: number, doff: number, soff: number) {

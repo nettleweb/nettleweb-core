@@ -1,3 +1,4 @@
+import { Array, Int32Array } from "../misc/intrinsics.js";
 import BlockHashStream from "./BlockHashStream.js";
 
 const K = [

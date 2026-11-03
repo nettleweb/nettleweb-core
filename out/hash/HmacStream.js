@@ -1,3 +1,4 @@
+import { Uint8Array } from "../misc/intrinsics.js";
 import Null from "../misc/Null.js";
 export default class HmacStream extends Null {
     #base;

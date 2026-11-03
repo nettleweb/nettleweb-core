@@ -1,3 +1,4 @@
+import { Array, Int32Array } from "../misc/intrinsics.js";
 import BlockHashStream from "./BlockHashStream.js";
 export default class Sha1Stream extends BlockHashStream {
     get algorithm() {

@@ -1,3 +1,4 @@
+import { Uint8Array } from "../misc/intrinsics.js";
 import Null from "../misc/Null.js";
 function arrayCopy(dst, src, len, doff, soff) {
     for (let d = doff, s = soff, c = 0; c < len; d++, s++, c++)

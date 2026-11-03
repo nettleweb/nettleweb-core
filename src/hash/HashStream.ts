@@ -1,4 +1,4 @@
-import { Array, imul } from "../misc/intrinsics.js";
+import { Array, imul, Uint32Array } from "../misc/intrinsics.js";
 import Null from "../misc/Null.js";
 
 export default class HashStream extends Null implements NettleWeb.HashStream {
