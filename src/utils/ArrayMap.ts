@@ -63,11 +63,25 @@ export default class ArrayMap<K, V> extends Null implements NettleWeb.ArrayMap<K
 	}
 
 	keys(): K[] {
-		return this.#entries.map((e) => e[0]);
+		const entries = this.#entries;
+		const length = entries.length;
+		const result = new Array(length);
+
+		for (let i = 0; i < length; i++)
+			result[i] = entries[i][0];
+
+		return result;
 	}
 
 	values(): V[] {
-		return this.#entries.map((e) => e[1]);
+		const entries = this.#entries;
+		const length = entries.length;
+		const result = new Array(length);
+
+		for (let i = 0; i < length; i++)
+			result[i] = entries[i][1];
+
+		return result;
 	}
 
 	entries(): [K, V][] {

@@ -1,3 +1,4 @@
+import { Array, decodeURIComponent, encodeURIComponent, getProps } from "../misc/intrinsics.js";
 import StringMap, { getEntries } from "./StringMap.js";
 
 export default class URLQueries extends StringMap implements NettleWeb.URLQueries {
@@ -20,7 +21,7 @@ export default class URLQueries extends StringMap implements NettleWeb.URLQuerie
 
 	toString(): string {
 		const entries = getEntries(this);
-		const keys = Object.keys(entries);
+		const keys = getProps(entries);
 		const len = keys.length;
 		const out = new Array(len);
 

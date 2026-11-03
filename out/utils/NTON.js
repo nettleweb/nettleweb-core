@@ -1,4 +1,5 @@
-import { decodeUTF8, encodeUTF8, isArrayBuffer } from "../misc/misc.js";
+import { decodeUTF8, encodeUTF8 } from "../coder/Charset.js";
+import { ArrayBuffer, DataView, Error, getProps, isArray, isArrayBuffer, isArrayBufferView, isSafeInteger, Number } from "../misc/intrinsics.js";
 function encodeRaw(data, value, offset) {
     switch (typeof value) {
         case "undefined":
@@ -19,7 +20,7 @@ function encodeRaw(data, value, offset) {
             break;
         case "number":
             {
-                if (Number.isSafeInteger(value)) {
+                if (isSafeInteger(value)) {
                     if (value >= 0) {
                         if (value < 0x100) {
                             data.push(10 /* DataID.uint8 */, value);
@@ -65,14 +66,14 @@ function encodeRaw(data, value, offset) {
                 data.push(255 /* DataID.Null */);
                 offset++;
             }
-            else if (Array.isArray(value)) {
+            else if (isArray(value)) {
                 const length = value.length;
                 data.push(99 /* DataID.array */, length & 0xff, (length >> 8) & 0xff, (length >> 16) & 0xff, (length >> 24) & 0xff);
                 offset += 5;
                 for (const e of value)
                     offset = encodeRaw(data, e, offset);
             }
-            else if (ArrayBuffer.isView(value)) {
+            else if (isArrayBufferView(value)) {
                 const buffer = new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
                 const length = buffer.byteLength;
                 data.push(102 /* DataID.binary */, length & 0xff, (length >> 8) & 0xff, (length >> 16) & 0xff, (length >> 24) & 0xff, buffer);
@@ -85,7 +86,7 @@ function encodeRaw(data, value, offset) {
                 offset += length + 5;
             }
             else {
-                const keys = Object.keys(value);
+                const keys = getProps(value);
                 const len = keys.length;
                 data.push(100 /* DataID.object */, len & 0xff, (len >> 8) & 0xff, (len >> 16) & 0xff, (len >> 24) & 0xff);
                 offset += 5;
@@ -186,7 +187,7 @@ const NTON = {
                         }
                         return object;
                     }
-                case 102 /* DataID.binary */: // DO NOT INLINE the length as there will break the offset
+                case 102 /* DataID.binary */:
                     {
                         const length = ((data[offset++] & 0xff) | ((data[offset++] & 0xff) << 8) | ((data[offset++] & 0xff) << 16) | ((data[offset++] & 0xff) << 24)) >>> 0;
                         return data.subarray(offset, offset += length);

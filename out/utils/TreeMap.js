@@ -1,3 +1,4 @@
+import { floor } from "../misc/intrinsics.js";
 import { DEFAULT_CMP } from "../misc/misc.js";
 import Null from "../misc/Null.js";
 export default class TreeMap extends Null {
@@ -17,7 +18,7 @@ export default class TreeMap extends Null {
                 // [parent_node, start_index, end_index, (true=left, false=right)]
                 const stack = [];
                 // Create the root node from the middle of the entire array
-                const mid = Math.floor((length - 1) / 2);
+                const mid = floor((length - 1) / 2);
                 const root = {
                     key: entries[mid][0],
                     value: entries[mid][1]
@@ -33,7 +34,7 @@ export default class TreeMap extends Null {
                     const [parentNode, start, end, isLeft] = stack.pop();
                     // If the segment is valid, create a new node from its middle element
                     if (start <= end) {
-                        const subMid = Math.floor((start + end) / 2);
+                        const subMid = floor((start + end) / 2);
                         const newNode = {
                             key: entries[subMid][0],
                             value: entries[subMid][1]

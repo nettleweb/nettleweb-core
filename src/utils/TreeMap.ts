@@ -1,3 +1,4 @@
+import { floor } from "../misc/intrinsics.js";
 import { DEFAULT_CMP } from "../misc/misc.js";
 import Null from "../misc/Null.js";
 
@@ -30,7 +31,7 @@ export default class TreeMap<K, V> extends Null implements NettleWeb.TreeMap<K, 
 				const stack: [Node<K, V>, number, number, boolean][] = [];
 
 				// Create the root node from the middle of the entire array
-				const mid = Math.floor((length - 1) / 2);
+				const mid = floor((length - 1) / 2);
 				const root: Node<K, V> = {
 					key: entries[mid][0],
 					value: entries[mid][1]
@@ -49,7 +50,7 @@ export default class TreeMap<K, V> extends Null implements NettleWeb.TreeMap<K, 
 
 					// If the segment is valid, create a new node from its middle element
 					if (start <= end) {
-						const subMid = Math.floor((start + end) / 2);
+						const subMid = floor((start + end) / 2);
 						const newNode: Node<K, V> = {
 							key: entries[subMid][0],
 							value: entries[subMid][1]

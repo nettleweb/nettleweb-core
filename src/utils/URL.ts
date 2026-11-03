@@ -1,3 +1,4 @@
+import { Error } from "../misc/intrinsics.js";
 import Null from "../misc/Null.js";
 import URLQueries from "./URLQueries.js";
 

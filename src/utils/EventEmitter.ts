@@ -1,10 +1,11 @@
+import { apply, ownKeys } from "../misc/intrinsics.js";
 import Null from "../misc/Null.js";
 
 export default class EventEmitter extends Null implements NettleWeb.EventEmitter {
 	readonly #listeners: Record<NettleWeb.EventKey, {
 		$: NettleWeb.EventListener,
 		m: boolean;
-	}[] | nul> = Object.create(null);
+	}[] | nul> = { __proto__: null } as any;
 
 	on(e: NettleWeb.EventKey, f: NettleWeb.EventListener) {
 		const list = (this.#listeners[e] ||= []);
@@ -37,7 +38,7 @@ export default class EventEmitter extends Null implements NettleWeb.EventEmitter
 				if (f != null) {
 					for (let i = 0; i < list.length; i++) {
 						if (list[i].$ === f) {
-							list.splice(i, 1);
+							list.splice(i--, 1);
 							return true;
 						}
 					}
@@ -51,7 +52,7 @@ export default class EventEmitter extends Null implements NettleWeb.EventEmitter
 		if (f != null) {
 			let rt: boolean = false;
 
-			for (const k of Reflect.ownKeys(map)) {
+			for (const k of ownKeys(map)) {
 				const list = map[k];
 				if (list != null) {
 					$: for (let i = 0; i < list.length; i++) {
@@ -70,7 +71,7 @@ export default class EventEmitter extends Null implements NettleWeb.EventEmitter
 
 		let rt: boolean = false;
 
-		for (const k of Object.keys(map)) {
+		for (const k of ownKeys(map)) {
 			if (delete map[k])
 				rt = true;
 		}
@@ -90,7 +91,7 @@ export default class EventEmitter extends Null implements NettleWeb.EventEmitter
 				if (it.m)
 					list.splice(i--, 1);
 
-				Reflect.apply(it.$, this, v);
+				apply(it.$, this, v);
 			}
 
 			return rt;
@@ -105,7 +106,7 @@ export default class EventEmitter extends Null implements NettleWeb.EventEmitter
 		const map = this.#listeners;
 		const set = new Set<NettleWeb.EventListener>();
 
-		for (const k of Reflect.ownKeys(map)) {
+		for (const k of ownKeys(map)) {
 			const list = map[k];
 			if (list != null) {
 				for (const e of list)
@@ -113,6 +114,6 @@ export default class EventEmitter extends Null implements NettleWeb.EventEmitter
 			}
 		}
 
-		return Array.from(set);
+		return [...set];
 	}
 }

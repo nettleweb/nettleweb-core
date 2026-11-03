@@ -1,4 +1,4 @@
-import { encodeUTF8 } from "../misc/misc.js";
+import { encodeUTF8 } from "../coder/Charset.js";
 
 const hc = "0123456789abcdef";
 
@@ -21,10 +21,12 @@ const hh = (a: number, b: number, c: number, d: number, x: number, s: number, t:
 const ii = (a: number, b: number, c: number, d: number, x: number, s: number, t: number) => cm(c ^ (b | (~d)), a, b, x, s, t);
 
 export default function md5(data: string | NettleWeb.BufferView): string {
-	const msg = typeof data === "string" ? encodeUTF8(data) : data;
-	const msglen = msg.length;
-	const length = (((msglen + 8) >> 6) + 1) * 16;
-	const array = new Array<number>(length).fill(0);
+	if (typeof data === "string")
+		data = encodeUTF8(data);
+
+	const buflen = data.length;
+	const length = (((buflen + 8) >> 6) + 1) * 16;
+	const buffer = new Array<number>(length).fill(0);
 
 	let a = 1732584193;
 	let b = -271733879;
@@ -32,36 +34,36 @@ export default function md5(data: string | NettleWeb.BufferView): string {
 	let d = 271733878;
 	let i, olda, oldb, oldc, oldd;
 
-	for (i = 0; i < msglen; i++)
-		array[i >> 2] |= msg[i] << ((i % 4) * 8);
+	for (i = 0; i < buflen; i++)
+		buffer[i >> 2] |= data[i] << ((i % 4) * 8);
 
-	array[i >> 2] |= 0x80 << ((i % 4) * 8);
-	array[length - 2] = msglen * 8;
+	buffer[i >> 2] |= 0x80 << ((i % 4) * 8);
+	buffer[length - 2] = buflen * 8;
 
 	for (i = 0; i < length; i += 16) {
 		olda = a; oldb = b; oldc = c; oldd = d;
-		a = ff(a, b, c, d, array[i + 0], 7, -680876936); d = ff(d, a, b, c, array[i + 1], 12, -389564586); c = ff(c, d, a, b, array[i + 2], 17, 606105819);
-		b = ff(b, c, d, a, array[i + 3], 22, -1044525330); a = ff(a, b, c, d, array[i + 4], 7, -176418897); d = ff(d, a, b, c, array[i + 5], 12, 1200080426);
-		c = ff(c, d, a, b, array[i + 6], 17, -1473231341); b = ff(b, c, d, a, array[i + 7], 22, -45705983); a = ff(a, b, c, d, array[i + 8], 7, 1770035416);
-		d = ff(d, a, b, c, array[i + 9], 12, -1958414417); c = ff(c, d, a, b, array[i + 10], 17, -42063); b = ff(b, c, d, a, array[i + 11], 22, -1990404162);
-		a = ff(a, b, c, d, array[i + 12], 7, 1804603682); d = ff(d, a, b, c, array[i + 13], 12, -40341101); c = ff(c, d, a, b, array[i + 14], 17, -1502002290);
-		b = ff(b, c, d, a, array[i + 15], 22, 1236535329); a = gg(a, b, c, d, array[i + 1], 5, -165796510); d = gg(d, a, b, c, array[i + 6], 9, -1069501632);
-		c = gg(c, d, a, b, array[i + 11], 14, 643717713); b = gg(b, c, d, a, array[i + 0], 20, -373897302); a = gg(a, b, c, d, array[i + 5], 5, -701558691);
-		d = gg(d, a, b, c, array[i + 10], 9, 38016083); c = gg(c, d, a, b, array[i + 15], 14, -660478335); b = gg(b, c, d, a, array[i + 4], 20, -405537848);
-		a = gg(a, b, c, d, array[i + 9], 5, 568446438); d = gg(d, a, b, c, array[i + 14], 9, -1019803690); c = gg(c, d, a, b, array[i + 3], 14, -187363961);
-		b = gg(b, c, d, a, array[i + 8], 20, 1163531501); a = gg(a, b, c, d, array[i + 13], 5, -1444681467); d = gg(d, a, b, c, array[i + 2], 9, -51403784);
-		c = gg(c, d, a, b, array[i + 7], 14, 1735328473); b = gg(b, c, d, a, array[i + 12], 20, -1926607734); a = hh(a, b, c, d, array[i + 5], 4, -378558);
-		d = hh(d, a, b, c, array[i + 8], 11, -2022574463); c = hh(c, d, a, b, array[i + 11], 16, 1839030562); b = hh(b, c, d, a, array[i + 14], 23, -35309556);
-		a = hh(a, b, c, d, array[i + 1], 4, -1530992060); d = hh(d, a, b, c, array[i + 4], 11, 1272893353); c = hh(c, d, a, b, array[i + 7], 16, -155497632);
-		b = hh(b, c, d, a, array[i + 10], 23, -1094730640); a = hh(a, b, c, d, array[i + 13], 4, 681279174); d = hh(d, a, b, c, array[i + 0], 11, -358537222);
-		c = hh(c, d, a, b, array[i + 3], 16, -722521979); b = hh(b, c, d, a, array[i + 6], 23, 76029189); a = hh(a, b, c, d, array[i + 9], 4, -640364487);
-		d = hh(d, a, b, c, array[i + 12], 11, -421815835); c = hh(c, d, a, b, array[i + 15], 16, 530742520); b = hh(b, c, d, a, array[i + 2], 23, -995338651);
-		a = ii(a, b, c, d, array[i + 0], 6, -198630844); d = ii(d, a, b, c, array[i + 7], 10, 1126891415); c = ii(c, d, a, b, array[i + 14], 15, -1416354905);
-		b = ii(b, c, d, a, array[i + 5], 21, -57434055); a = ii(a, b, c, d, array[i + 12], 6, 1700485571); d = ii(d, a, b, c, array[i + 3], 10, -1894986606);
-		c = ii(c, d, a, b, array[i + 10], 15, -1051523); b = ii(b, c, d, a, array[i + 1], 21, -2054922799); a = ii(a, b, c, d, array[i + 8], 6, 1873313359);
-		d = ii(d, a, b, c, array[i + 15], 10, -30611744); c = ii(c, d, a, b, array[i + 6], 15, -1560198380); b = ii(b, c, d, a, array[i + 13], 21, 1309151649);
-		a = ii(a, b, c, d, array[i + 4], 6, -145523070); d = ii(d, a, b, c, array[i + 11], 10, -1120210379); c = ii(c, d, a, b, array[i + 2], 15, 718787259);
-		b = ii(b, c, d, a, array[i + 9], 21, -343485551); a = ad(a, olda); b = ad(b, oldb); c = ad(c, oldc); d = ad(d, oldd);
+		a = ff(a, b, c, d, buffer[i + 0], 7, -680876936); d = ff(d, a, b, c, buffer[i + 1], 12, -389564586); c = ff(c, d, a, b, buffer[i + 2], 17, 606105819);
+		b = ff(b, c, d, a, buffer[i + 3], 22, -1044525330); a = ff(a, b, c, d, buffer[i + 4], 7, -176418897); d = ff(d, a, b, c, buffer[i + 5], 12, 1200080426);
+		c = ff(c, d, a, b, buffer[i + 6], 17, -1473231341); b = ff(b, c, d, a, buffer[i + 7], 22, -45705983); a = ff(a, b, c, d, buffer[i + 8], 7, 1770035416);
+		d = ff(d, a, b, c, buffer[i + 9], 12, -1958414417); c = ff(c, d, a, b, buffer[i + 10], 17, -42063); b = ff(b, c, d, a, buffer[i + 11], 22, -1990404162);
+		a = ff(a, b, c, d, buffer[i + 12], 7, 1804603682); d = ff(d, a, b, c, buffer[i + 13], 12, -40341101); c = ff(c, d, a, b, buffer[i + 14], 17, -1502002290);
+		b = ff(b, c, d, a, buffer[i + 15], 22, 1236535329); a = gg(a, b, c, d, buffer[i + 1], 5, -165796510); d = gg(d, a, b, c, buffer[i + 6], 9, -1069501632);
+		c = gg(c, d, a, b, buffer[i + 11], 14, 643717713); b = gg(b, c, d, a, buffer[i + 0], 20, -373897302); a = gg(a, b, c, d, buffer[i + 5], 5, -701558691);
+		d = gg(d, a, b, c, buffer[i + 10], 9, 38016083); c = gg(c, d, a, b, buffer[i + 15], 14, -660478335); b = gg(b, c, d, a, buffer[i + 4], 20, -405537848);
+		a = gg(a, b, c, d, buffer[i + 9], 5, 568446438); d = gg(d, a, b, c, buffer[i + 14], 9, -1019803690); c = gg(c, d, a, b, buffer[i + 3], 14, -187363961);
+		b = gg(b, c, d, a, buffer[i + 8], 20, 1163531501); a = gg(a, b, c, d, buffer[i + 13], 5, -1444681467); d = gg(d, a, b, c, buffer[i + 2], 9, -51403784);
+		c = gg(c, d, a, b, buffer[i + 7], 14, 1735328473); b = gg(b, c, d, a, buffer[i + 12], 20, -1926607734); a = hh(a, b, c, d, buffer[i + 5], 4, -378558);
+		d = hh(d, a, b, c, buffer[i + 8], 11, -2022574463); c = hh(c, d, a, b, buffer[i + 11], 16, 1839030562); b = hh(b, c, d, a, buffer[i + 14], 23, -35309556);
+		a = hh(a, b, c, d, buffer[i + 1], 4, -1530992060); d = hh(d, a, b, c, buffer[i + 4], 11, 1272893353); c = hh(c, d, a, b, buffer[i + 7], 16, -155497632);
+		b = hh(b, c, d, a, buffer[i + 10], 23, -1094730640); a = hh(a, b, c, d, buffer[i + 13], 4, 681279174); d = hh(d, a, b, c, buffer[i + 0], 11, -358537222);
+		c = hh(c, d, a, b, buffer[i + 3], 16, -722521979); b = hh(b, c, d, a, buffer[i + 6], 23, 76029189); a = hh(a, b, c, d, buffer[i + 9], 4, -640364487);
+		d = hh(d, a, b, c, buffer[i + 12], 11, -421815835); c = hh(c, d, a, b, buffer[i + 15], 16, 530742520); b = hh(b, c, d, a, buffer[i + 2], 23, -995338651);
+		a = ii(a, b, c, d, buffer[i + 0], 6, -198630844); d = ii(d, a, b, c, buffer[i + 7], 10, 1126891415); c = ii(c, d, a, b, buffer[i + 14], 15, -1416354905);
+		b = ii(b, c, d, a, buffer[i + 5], 21, -57434055); a = ii(a, b, c, d, buffer[i + 12], 6, 1700485571); d = ii(d, a, b, c, buffer[i + 3], 10, -1894986606);
+		c = ii(c, d, a, b, buffer[i + 10], 15, -1051523); b = ii(b, c, d, a, buffer[i + 1], 21, -2054922799); a = ii(a, b, c, d, buffer[i + 8], 6, 1873313359);
+		d = ii(d, a, b, c, buffer[i + 15], 10, -30611744); c = ii(c, d, a, b, buffer[i + 6], 15, -1560198380); b = ii(b, c, d, a, buffer[i + 13], 21, 1309151649);
+		a = ii(a, b, c, d, buffer[i + 4], 6, -145523070); d = ii(d, a, b, c, buffer[i + 11], 10, -1120210379); c = ii(c, d, a, b, buffer[i + 2], 15, 718787259);
+		b = ii(b, c, d, a, buffer[i + 9], 21, -343485551); a = ad(a, olda); b = ad(b, oldb); c = ad(c, oldc); d = ad(d, oldd);
 	}
 
 	return rh(a) + rh(b) + rh(c) + rh(d);

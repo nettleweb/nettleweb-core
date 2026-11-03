@@ -1,4 +1,5 @@
-import { decodeUTF8, encodeUTF8, isArrayBuffer } from "../misc/misc.js";
+import { decodeUTF8, encodeUTF8 } from "../coder/Charset.js";
+import { ArrayBuffer, DataView, Error, getProps, isArray, isArrayBuffer, isArrayBufferView, isSafeInteger, Number } from "../misc/intrinsics.js";
 
 const enum DataID {
 	Void = 0,
@@ -51,7 +52,7 @@ function encodeRaw(data: (number | Uint8Array)[], value: any, offset: number): n
 			break;
 		case "number":
 			{
-				if (Number.isSafeInteger(value)) {
+				if (isSafeInteger(value)) {
 					if (value >= 0) {
 						if (value < 0x100) {
 							data.push(DataID.uint8, value);
@@ -107,7 +108,7 @@ function encodeRaw(data: (number | Uint8Array)[], value: any, offset: number): n
 			if (value === null) {
 				data.push(DataID.Null);
 				offset++;
-			} else if (Array.isArray(value)) {
+			} else if (isArray(value)) {
 				const length = value.length;
 				data.push(
 					DataID.array,
@@ -120,7 +121,7 @@ function encodeRaw(data: (number | Uint8Array)[], value: any, offset: number): n
 
 				for (const e of value)
 					offset = encodeRaw(data, e, offset);
-			} else if (ArrayBuffer.isView(value)) {
+			} else if (isArrayBufferView(value)) {
 				const buffer = new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
 				const length = buffer.byteLength;
 
@@ -147,7 +148,7 @@ function encodeRaw(data: (number | Uint8Array)[], value: any, offset: number): n
 				);
 				offset += length + 5;
 			} else {
-				const keys = Object.keys(value);
+				const keys = getProps(value);
 				const len = keys.length;
 
 				data.push(

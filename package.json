@@ -2,7 +2,7 @@
 	"name": "@nettleweb/core",
 	"author": "NettleWeb <support@nettleweb.com> (https://nettleweb.com/)",
 	"license": "MIT",
-	"version": "0.3.2",
+	"version": "0.4.0",
 	"homepage": "https://github.com/nettleweb/nettleweb-core",
 	"description": "The core JavaScript support framework used by NettleWeb projects.",
 	"type": "module",
@@ -17,9 +17,15 @@
 	],
 	"module": "main.js",
 	"exports": {
-		"types": "./types/types.d.ts",
-		"import": "./main.js",
-		"require": "./main.cjs"
+		".": {
+			"types": "./types/types.d.ts",
+			"import": "./main.js",
+			"require": "./main.cjs"
+		},
+		"./intrinsics": {
+			"types": "./types/types.d.ts",
+			"import": "./out/misc/intrinsics.js"
+		}
 	},
 	"bugs": {
 		"url": "https://github.com/nettleweb/nettleweb-core/issues",
@@ -34,7 +40,7 @@
 		"url": "git+https://github.com/nettleweb/nettleweb-core.git"
 	},
 	"devDependencies": {
-		"typescript": "^5.9.3"
+		"typescript": "^7.0.2"
 	},
 	"scripts": {
 		"build": "./scripts/build.sh"

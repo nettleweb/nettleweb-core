@@ -32,7 +32,7 @@ export default class SecureRandom extends AbstractRandom<number[]> implements Ne
 			((view[3] & 0xff) << 24)) >>> 0) / 4294967296;
 	}
 
-	randBuf<E extends number[] | NettleWeb.Buffer>(buf: E): E {
+	randBuf<E extends NettleWeb.BufferLike>(buf: E): E {
 		const counter = this.#counter;
 		const length = buf.length;
 		const aes = this.#aes;

@@ -1,7 +1,8 @@
+import { Error, getProps, global, symToString } from "./misc/intrinsics.js";
 import { defProp, defPropEnum, defPropEnumConfig } from "./misc/objutil.js";
 import module from "./module.js";
 
-const modules: Record<string, string[]> = Object.create(null);
+const modules: Record<string, string[]> = { __proto__: null } as any;
 
 defProp(module, "loadModule", (name: string, obj: any) => {
 	if (typeof name !== "string" || name === "core")
@@ -9,7 +10,7 @@ defProp(module, "loadModule", (name: string, obj: any) => {
 	if (name in modules)
 		throw new Error("Module has already been loaded: " + name);
 
-	const keys = Object.keys(obj);
+	const keys = getProps(obj);
 	for (const k of keys)
 		defPropEnumConfig(module, k, obj[k]);
 
@@ -31,7 +32,7 @@ defProp(module, "removeModule", (name: string) => {
 	return false;
 });
 defProp(module, "activeModules", () => {
-	const keys = Object.keys(modules);
+	const keys = getProps(modules);
 	keys.unshift("core");
 	return keys;
 });
@@ -39,25 +40,12 @@ defProp(module, "activeModules", () => {
 defProp(module, "default", module);
 defProp(module, "NettleWeb", module);
 defProp(module, "__esModule", true);
-defProp(module, Symbol.toStringTag, "NettleWeb");
+defProp(module, symToString, "NettleWeb");
 
 // ! IMPORTANT: Redefine all built-in members as non-configurable to avoid issues when interacting
 // with the native c++ addon
-for (const k of Object.keys(module))
+for (const k of getProps(module))
 	defPropEnum(module, k, module[k]);
 
-declare global {
-	var self: globalThis;
-	var window: globalThis;
-	var globalThis: globalThis;
-}
-
-{
-	const _global = typeof globalThis === "object" ? globalThis : typeof window === "object" ? window : typeof self === "object" ? self : Function("return this;")();
-	if (_global == null || typeof _global !== "object" || !Object.isExtensible(_global))
-		throw new Error("Failed to retrieve global object.");
-
-	defProp(_global, "NettleWeb", module);
-}
-
+defProp(global, "NettleWeb", module);
 export default module;

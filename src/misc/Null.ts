@@ -1,8 +1,9 @@
+import { freeze, getPrototypeOf, setPrototypeOf } from "./intrinsics.js";
 import { defProp } from "./objutil.js";
 
-const Null: typeof NettleWeb.Null = Object.setPrototypeOf(function __struct__(this: unknown) {
+const Null: typeof NettleWeb.Null = setPrototypeOf(function __struct__(this: unknown) {
 	if (typeof new.target === "function") {
-		for (let p = Object.getPrototypeOf(this); p != null; p = Object.getPrototypeOf(p)) {
+		for (let p = getPrototypeOf(this); p != null; p = getPrototypeOf(p)) {
 			try {
 				delete p["constructor"];
 			} catch (err) { }
@@ -10,5 +11,5 @@ const Null: typeof NettleWeb.Null = Object.setPrototypeOf(function __struct__(th
 	}
 }, null);
 
-defProp(Null, "prototype", Object.freeze(Object.create(null)));
-export default Object.freeze(Null);
+defProp(Null, "prototype", freeze({ __proto__: null }));
+export default freeze(Null);

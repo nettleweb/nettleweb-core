@@ -1,12 +1,12 @@
 {
 	"compilerOptions": {
 		"lib": ["ES2020"],
-		"types": ["../types/types.d.ts"],
+		"types": ["../types/types.d.ts", "../types/intrinsics.d.ts"],
 		"target": "ES2022",
 		"module": "Node16",
 		"strict": true,
 		"outDir": "../out/",
-		"allowJs": true,
+		"allowJs": false,
 		"checkJs": false,
 		"sourceMap": false,
 		"alwaysStrict": true,

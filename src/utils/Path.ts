@@ -1,3 +1,5 @@
+import { freeze } from "../misc/intrinsics.js";
+
 function simplify(path: string): string {
 	path = path.replace(/\/+/g, "/");
 	if (path[0] === "/")
@@ -59,7 +61,8 @@ function extname(path: string): string {
 	return i < 0 ? "" : path.slice(i);
 }
 
-const Path: typeof NettleWeb.Path = {
+const Path: _NullProto<typeof NettleWeb.Path> = {
+	__proto__: null,
 	name,
 	join,
 	parent,
@@ -67,4 +70,4 @@ const Path: typeof NettleWeb.Path = {
 	normalize
 };
 
-export default Object.freeze(Object.setPrototypeOf(Path, null)) as typeof NettleWeb.Path;
+export default freeze(Path);

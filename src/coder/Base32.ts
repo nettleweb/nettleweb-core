@@ -1,3 +1,5 @@
+import { Array, ceil, floor, freeze, Uint8Array } from "../misc/intrinsics.js";
+
 const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 const lookup = new Uint8Array(256);
 
@@ -8,12 +10,16 @@ for (let i = 0; i < 26; i++)
 for (let i = 0; i < 6; i++)
 	lookup[50 + i] = 26 + i; // 0-9
 
-const Base32: typeof NettleWeb.Base32 = {
+const Base32: _NullProto<typeof NettleWeb.Base32> = {
+	__proto__: null,
+
 	encode: (data: NettleWeb.BufferView) => {
 		const length = data.length;
-		const output = new Array(length === 0 ? 0 : Math.ceil(length / 5) * 8);
+		if (length === 0)
+			return "";
 
-		let blockCount = Math.floor(length / 5);
+		const output = new Array(ceil(length / 5) * 8);
+		let blockCount = floor(length / 5);
 		let i = 0, j = 0;
 
 		while (blockCount-- > 0) {
@@ -52,13 +58,13 @@ const Base32: typeof NettleWeb.Base32 = {
 
 		return output.join("");
 	},
-	decode: (str: string) => {
-		const length = str.length;
+	decode: (data: string) => {
+		const length = data.length;
 		let n = 0;
 		let padStart = length;
 
 		for (let i = 0; i < length; i++) {
-			const code = str.charCodeAt(i);
+			const code = data.charCodeAt(i);
 			if (code === 61) {
 				padStart = i;
 				break;
@@ -74,8 +80,9 @@ const Base32: typeof NettleWeb.Base32 = {
 		let index = 0;
 
 		for (let i = 0; i < padStart; i++) {
-			const code = str.charCodeAt(i);
+			const code = data.charCodeAt(i);
 			const val = lookup[code];
+
 			if (val === 0xFF)
 				continue;
 
@@ -92,4 +99,4 @@ const Base32: typeof NettleWeb.Base32 = {
 	}
 };
 
-export default Object.freeze(Object.setPrototypeOf(Base32, null)) as typeof NettleWeb.Base32;
+export default freeze(Base32);

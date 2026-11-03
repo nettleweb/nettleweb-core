@@ -1,3 +1,4 @@
+import { getProps, objEntries, objValues } from "../misc/intrinsics.js";
 import Null from "../misc/Null.js";
 
 export let getEntries: (obj: StringMap) => Record<string, string>;
@@ -6,7 +7,7 @@ export default class StringMap extends Null implements NettleWeb.StringMap {
 	readonly #entries: Record<string, string>;
 
 	get size(): number {
-		return Object.keys(this.#entries).length;
+		return getProps(this.#entries).length;
 	}
 
 	static {
@@ -15,7 +16,7 @@ export default class StringMap extends Null implements NettleWeb.StringMap {
 
 	constructor(init?: NettleWeb.StringMapInit | nul) {
 		super();
-		const entries = Object.create(null);
+		const entries = { __proto__: null } as any;
 		if (init != null) {
 			if (Symbol.iterator in init) {
 				for (const [k, v] of init)
@@ -24,7 +25,7 @@ export default class StringMap extends Null implements NettleWeb.StringMap {
 				for (const [k, v] of init.entries())
 					entries[k] = v;
 			} else {
-				for (const k of Object.keys(init))
+				for (const k of getProps(init))
 					entries[k] = (init as any)[k];
 			}
 		}
@@ -45,7 +46,7 @@ export default class StringMap extends Null implements NettleWeb.StringMap {
 
 	clear(): void {
 		const entries = this.#entries;
-		for (const k of Object.keys(entries))
+		for (const k of getProps(entries))
 			delete entries[k];
 	}
 
@@ -59,18 +60,18 @@ export default class StringMap extends Null implements NettleWeb.StringMap {
 	}
 
 	keys(): string[] {
-		return Object.keys(this.#entries);
+		return getProps(this.#entries);
 	}
 
 	values(): string[] {
-		return Object.values(this.#entries);
+		return objValues(this.#entries);
 	}
 
 	entries(): [string, string][] {
-		return Object.entries(this.#entries);
+		return objEntries(this.#entries);
 	}
 
 	[Symbol.iterator](): IterableIterator<[string, string]> {
-		return Object.entries(this.#entries).values();
+		return objEntries(this.#entries).values();
 	}
 }

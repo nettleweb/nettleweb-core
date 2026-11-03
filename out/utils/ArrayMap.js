@@ -52,10 +52,20 @@ export default class ArrayMap extends Null {
         return false;
     }
     keys() {
-        return this.#entries.map((e) => e[0]);
+        const entries = this.#entries;
+        const length = entries.length;
+        const result = new Array(length);
+        for (let i = 0; i < length; i++)
+            result[i] = entries[i][0];
+        return result;
     }
     values() {
-        return this.#entries.map((e) => e[1]);
+        const entries = this.#entries;
+        const length = entries.length;
+        const result = new Array(length);
+        for (let i = 0; i < length; i++)
+            result[i] = entries[i][1];
+        return result;
     }
     entries() {
         return [...this.#entries];

@@ -1,16 +1,17 @@
+import { getProps, objEntries, objValues } from "../misc/intrinsics.js";
 import Null from "../misc/Null.js";
 export let getEntries;
 export default class StringMap extends Null {
     #entries;
     get size() {
-        return Object.keys(this.#entries).length;
+        return getProps(this.#entries).length;
     }
     static {
         getEntries = (obj) => obj.#entries;
     }
     constructor(init) {
         super();
-        const entries = Object.create(null);
+        const entries = { __proto__: null };
         if (init != null) {
             if (Symbol.iterator in init) {
                 for (const [k, v] of init)
@@ -21,7 +22,7 @@ export default class StringMap extends Null {
                     entries[k] = v;
             }
             else {
-                for (const k of Object.keys(init))
+                for (const k of getProps(init))
                     entries[k] = init[k];
             }
         }
@@ -38,7 +39,7 @@ export default class StringMap extends Null {
     }
     clear() {
         const entries = this.#entries;
-        for (const k of Object.keys(entries))
+        for (const k of getProps(entries))
             delete entries[k];
     }
     delete(key) {
@@ -50,15 +51,15 @@ export default class StringMap extends Null {
         return false;
     }
     keys() {
-        return Object.keys(this.#entries);
+        return getProps(this.#entries);
     }
     values() {
-        return Object.values(this.#entries);
+        return objValues(this.#entries);
     }
     entries() {
-        return Object.entries(this.#entries);
+        return objEntries(this.#entries);
     }
     [Symbol.iterator]() {
-        return Object.entries(this.#entries).values();
+        return objEntries(this.#entries).values();
     }
 }

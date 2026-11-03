@@ -1,3 +1,4 @@
+import { Array, decodeURIComponent, encodeURIComponent, getProps } from "../misc/intrinsics.js";
 import StringMap, { getEntries } from "./StringMap.js";
 export default class URLQueries extends StringMap {
     constructor(init) {
@@ -19,7 +20,7 @@ export default class URLQueries extends StringMap {
     }
     toString() {
         const entries = getEntries(this);
-        const keys = Object.keys(entries);
+        const keys = getProps(entries);
         const len = keys.length;
         const out = new Array(len);
         for (let i = 0; i < len; i++) {

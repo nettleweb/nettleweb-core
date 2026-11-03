@@ -1,3 +1,4 @@
+import { floor, Uint8Array } from "../misc/intrinsics.js";
 import Null from "../misc/Null.js";
 export default class AbstractRandom extends Null {
     randBuf(buf) {
@@ -16,7 +17,9 @@ export default class AbstractRandom extends Null {
         return buf;
     }
     randInt(max, min) {
-        return (min ||= 0) + Math.floor(this.rand() * ((max || 4294967296) - min));
+        min ||= 0;
+        max ||= 4294967296;
+        return min + floor(this.rand() * (max - min));
     }
     randUUID() {
         const buf = this.randBuf(new Uint8Array(16));

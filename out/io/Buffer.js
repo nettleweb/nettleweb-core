@@ -1,12 +1,13 @@
-import { bufferConcat, emptyBuffer, isArrayBuffer, isBuffer } from "../misc/misc.js";
+import { construct, freeze, isArrayBuffer, isUint8Array, setPrototypeOf } from "../misc/intrinsics.js";
+import { bufferConcat, emptyBuffer } from "../misc/misc.js";
 import { defProp } from "../misc/objutil.js";
-const Buffer = Object.setPrototypeOf(function __struct__() {
+const Buffer = setPrototypeOf(function __struct__() {
     const func = new.target;
-    return Reflect.construct(Uint8Array, arguments, (func == null || func === Buffer) ? Uint8Array : func);
+    return construct(Uint8Array, arguments, (func == null || func === Buffer) ? Uint8Array : func);
 }, null);
-defProp(Buffer, "prototype", Object.freeze(Object.create(null)));
+defProp(Buffer, "prototype", freeze({ __proto__: null }));
 defProp(Buffer, "emptyBuffer", emptyBuffer);
 defProp(Buffer, "concat", bufferConcat);
-defProp(Buffer, "isBuffer", isBuffer);
+defProp(Buffer, "isBuffer", isUint8Array);
 defProp(Buffer, "isArrayBuffer", isArrayBuffer);
-export default Object.freeze(Buffer);
+export default freeze(Buffer);

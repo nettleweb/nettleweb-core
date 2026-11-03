@@ -1,3 +1,4 @@
+import { floor, Uint8Array } from "../misc/intrinsics.js";
 import Null from "../misc/Null.js";
 
 export default abstract class AbstractRandom<S> extends Null implements NettleWeb.Random<S> {
@@ -5,7 +6,7 @@ export default abstract class AbstractRandom<S> extends Null implements NettleWe
 	abstract rand(): number;
 	abstract setSeed(seed: S): void;
 
-	randBuf<E extends number[] | NettleWeb.Buffer>(buf: E): E {
+	randBuf<E extends NettleWeb.BufferLike>(buf: E): E {
 		const len = buf.length;
 		const rlen = len % 4;
 		const llen = len - rlen;
@@ -25,7 +26,9 @@ export default abstract class AbstractRandom<S> extends Null implements NettleWe
 	}
 
 	randInt(max?: number | nul, min?: number | nul): number {
-		return (min ||= 0) + Math.floor(this.rand() * ((max || 4294967296) - min));
+		min ||= 0;
+		max ||= 4294967296;
+		return min + floor(this.rand() * (max - min));
 	}
 
 	randUUID(): string {

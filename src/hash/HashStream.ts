@@ -1,11 +1,9 @@
-import Stream from "../io/Stream.js";
+import { Array, imul } from "../misc/intrinsics.js";
+import Null from "../misc/Null.js";
 
-export default class HashStream extends Stream implements NettleWeb.HashStream {
-	#h: number[] | nul;
+export default class HashStream extends Null implements NettleWeb.HashStream {
+	readonly #h: Uint32Array = new Uint32Array(4);
 
-	get canWrite(): boolean {
-		return true;
-	}
 	get algorithm(): string {
 		return "cyrb128";
 	}
@@ -18,48 +16,59 @@ export default class HashStream extends Stream implements NettleWeb.HashStream {
 		this.reset();
 	}
 
-	_write(buf: NettleWeb.BufferView): number {
-		const len = buf.length;
-		const h = this.#h!;
+	hash(): number[] {
+		const h = this.#h;
 
-		for (let i = 0; i < len; i++) {
-			const k = buf[i];
-			h[0] = h[1] ^ Math.imul(h[0] ^ k, 597399067);
-			h[1] = h[2] ^ Math.imul(h[1] ^ k, 2869860233);
-			h[2] = h[3] ^ Math.imul(h[2] ^ k, 951274213);
-			h[3] = h[0] ^ Math.imul(h[3] ^ k, 2716044179);
+		{
+			let [a, b, c, d] = h;
+			a = imul(c ^ (a >>> 18), 597399067);
+			b = imul(d ^ (b >>> 22), 2869860233);
+			c = imul(a ^ (c >>> 17), 951274213);
+			d = imul(b ^ (d >>> 19), 2716044179);
+			a = ((a ^ b ^ c ^ d) >>> 0);
+			b = ((b ^ a) >>> 0);
+			c = ((c ^ a) >>> 0);
+			d = ((d ^ a) >>> 0);
+			h[0] = a; h[1] = b; h[2] = c; h[3] = d;
 		}
 
-		return len;
-	}
-
-	hash(): number[] {
-		const h = this.#h!;
-
-		h[0] = Math.imul(h[2] ^ (h[0] >>> 18), 597399067);
-		h[1] = Math.imul(h[3] ^ (h[1] >>> 22), 2869860233);
-		h[2] = Math.imul(h[0] ^ (h[2] >>> 17), 951274213);
-		h[3] = Math.imul(h[1] ^ (h[3] >>> 19), 2716044179);
-
-		h[0] = ((h[0] ^ h[1] ^ h[2] ^ h[3]) >>> 0);
-		h[1] = ((h[1] ^ h[0]) >>> 0);
-		h[2] = ((h[2] ^ h[0]) >>> 0);
-		h[3] = ((h[3] ^ h[0]) >>> 0);
-
-		const result: number[] = new Array(16);
+		const out = new Array<number>(16);
 		for (let i = 0, p = 0; i < 4; i++) {
-			const hVal = h[i];
-			result[p++] = (hVal >>> 24) & 0xFF;
-			result[p++] = (hVal >>> 16) & 0xFF;
-			result[p++] = (hVal >>> 8) & 0xFF;
-			result[p++] = hVal & 0xFF;
+			const e = h[i];
+			out[p++] = (e >>> 24) & 0xFF;
+			out[p++] = (e >>> 16) & 0xFF;
+			out[p++] = (e >>> 8) & 0xFF;
+			out[p++] = e & 0xFF;
 		}
 
 		this.reset();
-		return result;
+		return out;
 	}
 
-	reset() {
-		this.#h = [1779033703, 3144134277, 1013904242, 2773480762];
+	reset(): this {
+		const h = this.#h;
+		h[0] = 1779033703;
+		h[1] = 3144134277;
+		h[2] = 1013904242;
+		h[3] = 2773480762;
+		return this;
+	}
+
+	update(buf: NettleWeb.BufferView): this {
+		const len = buf.length;
+		const h = this.#h!;
+
+		let [a, b, c, d] = h;
+
+		for (let i = 0; i < len; i++) {
+			const k = buf[i];
+			a = b ^ imul(a ^ k, 597399067);
+			b = c ^ imul(b ^ k, 2869860233);
+			c = d ^ imul(c ^ k, 951274213);
+			d = a ^ imul(d ^ k, 2716044179);
+		}
+
+		h[0] = a; h[1] = b; h[2] = c; h[3] = d;
+		return this;
 	}
 }

@@ -1,6 +1,7 @@
+import { apply, ownKeys } from "../misc/intrinsics.js";
 import Null from "../misc/Null.js";
 export default class EventEmitter extends Null {
-    #listeners = Object.create(null);
+    #listeners = { __proto__: null };
     on(e, f) {
         const list = (this.#listeners[e] ||= []);
         for (const it of list) {
@@ -29,7 +30,7 @@ export default class EventEmitter extends Null {
                 if (f != null) {
                     for (let i = 0; i < list.length; i++) {
                         if (list[i].$ === f) {
-                            list.splice(i, 1);
+                            list.splice(i--, 1);
                             return true;
                         }
                     }
@@ -41,7 +42,7 @@ export default class EventEmitter extends Null {
         }
         if (f != null) {
             let rt = false;
-            for (const k of Reflect.ownKeys(map)) {
+            for (const k of ownKeys(map)) {
                 const list = map[k];
                 if (list != null) {
                     $: for (let i = 0; i < list.length; i++) {
@@ -56,7 +57,7 @@ export default class EventEmitter extends Null {
             return rt;
         }
         let rt = false;
-        for (const k of Object.keys(map)) {
+        for (const k of ownKeys(map)) {
             if (delete map[k])
                 rt = true;
         }
@@ -71,7 +72,7 @@ export default class EventEmitter extends Null {
                 rt = true;
                 if (it.m)
                     list.splice(i--, 1);
-                Reflect.apply(it.$, this, v);
+                apply(it.$, this, v);
             }
             return rt;
         }
@@ -82,13 +83,13 @@ export default class EventEmitter extends Null {
             return this.#listeners[e]?.map((e) => e.$) || [];
         const map = this.#listeners;
         const set = new Set();
-        for (const k of Reflect.ownKeys(map)) {
+        for (const k of ownKeys(map)) {
             const list = map[k];
             if (list != null) {
                 for (const e of list)
                     set.add(e.$);
             }
         }
-        return Array.from(set);
+        return [...set];
     }
 }

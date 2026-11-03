@@ -1,3 +1,4 @@
+import { Array, freeze, Uint8Array } from "../misc/intrinsics.js";
 const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 const lookup = new Uint8Array(256);
 for (let i = 0; i < 26; i++)
@@ -10,9 +11,10 @@ lookup[43] = 62;
 lookup[47] = 63;
 lookup[61] = 0;
 const Base64 = {
+    __proto__: null,
     encode: (data) => {
         const length = data.length;
-        const output = new Array(((length / 3) | 0) * 4 + (length % 3 ? 4 : 0));
+        const output = new Array(((length / 3) >>> 0) * 4 + (length % 3 ? 4 : 0));
         let i = 0, j = 0;
         while (i < length - 2) {
             const n = (data[i] << 16) | (data[i + 1] << 8) | data[i + 2];
@@ -61,4 +63,4 @@ const Base64 = {
         return output;
     }
 };
-export default Object.freeze(Object.setPrototypeOf(Base64, null));
+export default freeze(Base64);

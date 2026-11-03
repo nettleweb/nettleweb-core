@@ -1,3 +1,4 @@
+import { freeze } from "../misc/intrinsics.js";
 function simplify(path) {
     path = path.replace(/\/+/g, "/");
     if (path[0] === "/")
@@ -51,10 +52,11 @@ function extname(path) {
     return i < 0 ? "" : path.slice(i);
 }
 const Path = {
+    __proto__: null,
     name,
     join,
     parent,
     extname,
     normalize
 };
-export default Object.freeze(Object.setPrototypeOf(Path, null));
+export default freeze(Path);

@@ -1,10 +1,8 @@
 import Buffer from "./io/Buffer.js";
-import Stream from "./io/Stream.js";
 import Null from "./misc/Null.js";
 import AsyncLock from "./utils/AsyncLock.js";
 import Base32 from "./coder/Base32.js";
 import Base64 from "./coder/Base64.js";
-import cyrb128 from "./utils/cyrb128.js";
 import EventEmitter from "./utils/EventEmitter.js";
 import md5 from "./utils/md5.js";
 import Hex from "./coder/Hex.js";
@@ -12,12 +10,10 @@ import SecureRandom from "./rand/SecureRandom.js";
 import Random from "./rand/Random.js";
 import NTON from "./utils/NTON.js";
 import Charset, { ASCII, UTF16BE, UTF16LE, UTF32BE, UTF32LE, UTF_8 } from "./coder/Charset.js";
-import sha256 from "./utils/sha256.js";
 import AES from "./utils/AES.js";
 import TreeMap from "./utils/TreeMap.js";
 import ArrayMap from "./utils/ArrayMap.js";
 import Path from "./utils/Path.js";
-import hmac_sha256 from "./utils/hmac_sha256.js";
 import Sha256Stream from "./hash/Sha256Stream.js";
 import HashStream from "./hash/HashStream.js";
 import Sha1Stream from "./hash/Sha1Stream.js";
@@ -26,14 +22,15 @@ import HmacSha256Stream from "./hash/HmacSha256Stream.js";
 import StringMap from "./utils/StringMap.js";
 import URL from "./utils/URL.js";
 import URLQueries from "./utils/URLQueries.js";
-import EmptyStream from "./io/EmptyStream.js";
-import QueuedStream from "./io/QueuedStream.js";
+import { cyrb128, hmac_sha1, hmac_sha256, sha1, sha256 } from "./utils/hashmisc.js";
 
-const module: Omit<NettleWeb, "NettleWeb" | "loadModule" | "removeModule" | "activeModules"> = {
+const module: _NullProto<Omit<NettleWeb, "NettleWeb" | "loadModule" | "removeModule" | "activeModules">> = {
+	__proto__: null,
 	md5: md5,
 	AES: AES,
 	URL: URL,
 	Hex: Hex,
+	sha1: sha1,
 	Null: Null,
 	Path: Path,
 	NTON: NTON,
@@ -44,7 +41,6 @@ const module: Omit<NettleWeb, "NettleWeb" | "loadModule" | "removeModule" | "act
 	Base64: Base64,
 	Buffer: Buffer,
 	Random: Random,
-	Stream: Stream,
 	Charset: Charset,
 	UTF16BE: UTF16BE,
 	UTF16LE: UTF16LE,
@@ -55,10 +51,9 @@ const module: Omit<NettleWeb, "NettleWeb" | "loadModule" | "removeModule" | "act
 	ArrayMap: ArrayMap,
 	StringMap: StringMap,
 	AsyncLock: AsyncLock,
+	hmac_sha1: hmac_sha1,
 	URLQueries: URLQueries,
 	hmac_sha256: hmac_sha256,
-	EmptyStream: EmptyStream,
-	QueuedStream: QueuedStream,
 	EventEmitter: EventEmitter,
 	SecureRandom: SecureRandom,
 	HashStream: HashStream,
@@ -68,4 +63,4 @@ const module: Omit<NettleWeb, "NettleWeb" | "loadModule" | "removeModule" | "act
 	HmacSha256Stream: HmacSha256Stream
 };
 
-export default Object.setPrototypeOf(module, null);
+export default module as any;

@@ -1,3 +1,5 @@
+import { Array, freeze, Uint8Array } from "../misc/intrinsics.js";
+
 const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 const lookup = new Uint8Array(256);
 
@@ -10,10 +12,12 @@ for (let i = 0; i < 10; i++)
 
 lookup[43] = 62; lookup[47] = 63; lookup[61] = 0;
 
-const Base64: typeof NettleWeb.Base64 = {
+const Base64: _NullProto<typeof NettleWeb.Base64> = {
+	__proto__: null,
+
 	encode: (data: NettleWeb.BufferView) => {
 		const length = data.length;
-		const output = new Array(((length / 3) | 0) * 4 + (length % 3 ? 4 : 0));
+		const output = new Array(((length / 3) >>> 0) * 4 + (length % 3 ? 4 : 0));
 
 		let i = 0, j = 0;
 
@@ -70,4 +74,4 @@ const Base64: typeof NettleWeb.Base64 = {
 	}
 };
 
-export default Object.freeze(Object.setPrototypeOf(Base64, null)) as typeof NettleWeb.Base64;
+export default freeze(Base64);

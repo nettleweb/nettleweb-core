@@ -8,7 +8,7 @@ declare global {
 	export type NettleWeb = typeof NettleWeb & { readonly NettleWeb: NettleWeb; };
 	export type globalThis = typeof globalThis & { readonly NettleWeb: NettleWeb };
 
-	export module NettleWeb {
+	export namespace NettleWeb {
 		export const NettleWeb: NettleWeb;
 
 		export function loadModule(name: string, module: object): void;
@@ -72,7 +72,11 @@ declare global {
 		//////////////////////////////////////////////////////
 		// Buffer
 		//////////////////////////////////////////////////////
-		export type BufferView = Buffer | number[] | ArrayLike<number>;
+		export type BufferView = Buffer | number[] | ArrayLike<number>; // readonly
+		export type BufferLike = Buffer | number[] | { // read+write
+			readonly length: number;
+			[i: number]: number;
+		};
 
 		export interface Buffer extends Uint8Array, Iterable<number>, ArrayLike<number> {
 			readonly length: number;
@@ -97,7 +101,7 @@ declare global {
 
 			setSeed(seed: Seed): void;
 			rand(): number;
-			randBuf(buf: number[] | Buffer): void;
+			randBuf(buf: BufferLike): void;
 			randInt(max?: number | nul, min?: number | nul): number;
 			randUUID(): string;
 		}
@@ -131,65 +135,6 @@ declare global {
 			forName(name: string): Charset;
 			isSupported(name: string): boolean;
 			defaultCharset(): Charset;
-		};
-
-		//////////////////////////////////////////////////////
-		// Streams
-		/////////////////////////////////////////////////////
-		export interface Stream {
-			readonly closed: boolean;
-			/** @abstract */
-			readonly canRead: boolean;
-			/** @abstract */
-			readonly canWrite: boolean;
-
-			/** @abstract */
-			_read(buf: Buffer): Awaitable<number>;
-			/** @abstract */
-			_write(buf: Buffer): Awaitable<number>;
-			/** @abstract */
-			_flush(): Awaitable<void>;
-			/** @abstract */
-			_close(): Awaitable<void>;
-
-			read(): Promise<number>;
-			read(buf: Buffer, off?: number | nul, len?: number | nul): Promise<number>;
-			readLine(charset?: nul, lineSep?: string | BufferView | nul): Promise<Buffer>;
-			readLine(charset: Charset | string, lineSep?: string | BufferView | nul): Promise<string>;
-			readNBytes(n: number, charset?: nul): Promise<Buffer>;
-			readNBytes(n: number, charset: Charset | string): Promise<string>;
-			readAllBytes(charset?: nul): Promise<Buffer>;
-			readAllBytes(charset: Charset | string): Promise<string>;
-
-			write(b: number): Promise<void>;
-			write(buf: string, charset?: Charset | string | nul): Promise<void>;
-			write(buf: Buffer, off?: number | nul, len?: number | nul): Promise<void>;
-			writeln(buf: string, charset?: Charset | string | nul, lineEnd?: string | nul): Promise<void>;
-			writeln(buf: Buffer, off?: number | nul, len?: number | nul, lineEnd?: string | nul): Promise<void>;
-
-			pipe(out: Stream, flush?: boolean | nul, close?: boolean | nul): Promise<number>;
-			flush(): Promise<void>;
-			close(): Promise<void>;
-			generator(chunkSize?: number | nul): AsyncGenerator<Buffer>;
-		}
-		export const Stream: {
-			new(): Stream;
-			readonly prototype: Stream;
-		};
-
-		export interface EmptyStream extends Stream {
-		}
-		export const EmptyStream: {
-			new(read?: boolean | nul, write?: boolean | nul): EmptyStream;
-			readonly prototype: EmptyStream;
-		};
-
-		export interface QueuedStream extends Stream {
-			enqueue(buf: Buffer | null): void;
-		}
-		export const QueuedStream: {
-			new(): QueuedStream;
-			readonly prototype: QueuedStream;
 		};
 
 		//////////////////////////////////////////////////////
@@ -269,15 +214,15 @@ declare global {
 		//////////////////////////////////////////////////////
 		// Binary Coders
 		//////////////////////////////////////////////////////
-		export module Hex {
+		export namespace Hex {
 			export function encode(data: BufferView): string;
 			export function decode(data: string): Buffer;
 		}
-		export module Base32 {
+		export namespace Base32 {
 			export function encode(data: BufferView): string;
 			export function decode(data: string): Buffer;
 		}
-		export module Base64 {
+		export namespace Base64 {
 			export function encode(data: BufferView): string;
 			export function decode(data: string): Buffer;
 		}
@@ -285,7 +230,7 @@ declare global {
 		//////////////////////////////////////////////////////
 		// Object Serializers
 		//////////////////////////////////////////////////////
-		export module NTON {
+		export namespace NTON {
 			export function encode(data: any): Buffer;
 			export function decode(data: Buffer): any;
 			export function validate(data: BufferView): boolean;
@@ -312,13 +257,13 @@ declare global {
 		//////////////////////////////////////////////////////
 		// Hash Functions
 		//////////////////////////////////////////////////////
-		export interface HashStream extends Stream {
+		export interface HashStream {
 			readonly algorithm: string;
 			readonly hashLength: number;
 
-			_write(buf: BufferView): number;
 			hash(): number[];
-			reset(): void;
+			reset(): this;
+			update(buf: BufferView): this;
 		}
 		export const HashStream: {
 			new(): HashStream;
@@ -354,14 +299,16 @@ declare global {
 		};
 
 		export function md5(data: string | BufferView): string;
+		export function sha1(data: string | BufferView): string;
 		export function sha256(data: string | BufferView): string;
 		export function cyrb128(data: string | BufferView): string;
+		export function hmac_sha1(key: BufferView, data: BufferView): number[];
 		export function hmac_sha256(key: BufferView, data: BufferView): number[];
 
 		//////////////////////////////////////////////////////
 		// Other Util Functions
 		//////////////////////////////////////////////////////
-		export module Path {
+		export namespace Path {
 			export function name(path: string): string;
 			export function join(...parts: string[]): string;
 			export function parent(path: string): string;

@@ -1,7 +1,8 @@
+import { freeze, getPrototypeOf, setPrototypeOf } from "./intrinsics.js";
 import { defProp } from "./objutil.js";
-const Null = Object.setPrototypeOf(function __struct__() {
+const Null = setPrototypeOf(function __struct__() {
     if (typeof new.target === "function") {
-        for (let p = Object.getPrototypeOf(this); p != null; p = Object.getPrototypeOf(p)) {
+        for (let p = getPrototypeOf(this); p != null; p = getPrototypeOf(p)) {
             try {
                 delete p["constructor"];
             }
@@ -9,5 +10,5 @@ const Null = Object.setPrototypeOf(function __struct__() {
         }
     }
 }, null);
-defProp(Null, "prototype", Object.freeze(Object.create(null)));
-export default Object.freeze(Null);
+defProp(Null, "prototype", freeze({ __proto__: null }));
+export default freeze(Null);
