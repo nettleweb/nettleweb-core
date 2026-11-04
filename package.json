@@ -23,7 +23,7 @@
 			"require": "./main.cjs"
 		},
 		"./intrinsics": {
-			"types": "./types/types.d.ts",
+			"types": "./types/intrinsics.d.ts",
 			"import": "./out/misc/intrinsics.js"
 		}
 	},
