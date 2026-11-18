@@ -1,4 +1,5 @@
 /// <reference lib="es2015" />
+/// <reference types="@nettleweb/core" />
 
 // global object
 export declare const global: globalThis;
@@ -100,3 +101,8 @@ export function isArray(arg: any): arg is Array<any>;
 export function isUint8Array(arg: any): arg is Uint8Array;
 export function isArrayBuffer(arg: any): arg is ArrayBuffer;
 export function isArrayBufferView(arg: any): arg is ArrayBufferView;
+
+// misc constants and functions
+export const PI: number;
+export const TWO_PI: number;
+export function now(): number;

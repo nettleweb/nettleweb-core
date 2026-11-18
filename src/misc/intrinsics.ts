@@ -7,6 +7,7 @@ declare global {
 }
 
 export const {
+	PI,
 	sin, cos, tan, sinh, cosh, tanh, atan2,
 	acos, asin, atan, asinh, acosh, atanh,
 	abs, ceil, floor, round, max, min,
@@ -18,6 +19,8 @@ export const {
 	parse: jsonParse,
 	stringify: jsonStringify,
 } = JSON;
+
+export const TWO_PI = 2 * PI;
 
 export const global: globalThis = typeof globalThis === "object" ? globalThis : typeof window === "object" ? window : typeof self === "object" ? self : Function("return this;")()
 export const {
@@ -76,14 +79,18 @@ export const {
 } = Symbol;
 
 export const {
-	apply,
-	ownKeys,
-	construct
-} = Reflect;
+	now
+} = Date;
 
 export const {
 	isArray
 } = Array;
+
+export const {
+	apply,
+	ownKeys,
+	construct
+} = Reflect;
 
 export const {
 	isView: isArrayBufferView
