@@ -1,5 +1,5 @@
 import { decodeUTF8, encodeUTF8 } from "../coder/Charset.js";
-import { DataView, Error, freeze, getProps, isArray, isArrayBuffer, isArrayBufferView, isSafeInteger, isUint8Array } from "../misc/intrinsics.js";
+import { DataView, Error, freeze, getProps, isArray, isArrayBuffer, isArrayBufferView, isSafeInteger, isUint8Array, Uint32Array, Uint8Array } from "../misc/intrinsics.js";
 // Reusable memory pools for encoding
 let e_buf = new Uint8Array(1024);
 let e_view = new DataView(e_buf.buffer);

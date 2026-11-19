@@ -254,7 +254,7 @@ export default class Charset extends Null implements NettleWeb.Charset {
 			encode: encodeUTF16,
 			decode: decodeUTF16
 		};
-		map["utf16be"] = map["utf16-be"] = map["utf-16be"] = map["utf-16-be"] = UTF16LE = {
+		map["utf16be"] = map["utf16-be"] = map["utf-16be"] = map["utf-16-be"] = UTF16BE = {
 			__proto__: proto,
 			name: "UTF-16BE",
 			encode: encodeUTF16BE,

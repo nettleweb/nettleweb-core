@@ -1,5 +1,5 @@
 /// <reference lib="es2015" />
-/// <reference types="@nettleweb/core" />
+/// <reference types="./types.d.ts" />
 
 // global object
 export declare const global: globalThis;
