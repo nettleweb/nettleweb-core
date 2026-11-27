@@ -11,8 +11,8 @@
 	"files": [
 		"/out/",
 		"/types/",
-		"bin.js",
 		"main.js",
+		"main.cjs",
 		"package.json"
 	],
 	"module": "main.js",
