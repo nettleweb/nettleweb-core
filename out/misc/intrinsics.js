@@ -4,13 +4,13 @@ export const TWO_PI = 2 * PI;
 export const global = typeof globalThis === "object" ? globalThis : typeof window === "object" ? window : typeof self === "object" ? self : Function("return this;")();
 export const { Map, Set, Date, Array, Error, String, Number, Object, Symbol, Boolean, DataView, Int32Array, Uint8Array, Uint16Array, Uint32Array, ArrayBuffer, Float32Array, Float64Array, parseInt, parseFloat, encodeURIComponent, decodeURIComponent } = global;
 export const { keys: getProps, // rename to prevent conflict as 'keys' is a common identifier
-values: objValues, entries: objEntries, freeze, setPrototypeOf, getPrototypeOf, defineProperty, defineProperties, preventExtensions } = Object;
+values: objValues, entries: objEntries, seal, freeze, setPrototypeOf, getPrototypeOf, defineProperty, defineProperties, preventExtensions } = Object;
 export const { fromCharCode, fromCodePoint } = String;
 export const { isNaN, isFinite, isSafeInteger } = Number;
 export const { iterator: symIterator, toStringTag: symToString } = Symbol;
 export const { now } = Date;
 export const { isArray } = Array;
-export const { apply, ownKeys, construct } = Reflect;
+export const { apply, ownKeys, construct, getOwnPropertyDescriptor } = Reflect;
 export const { isView: isArrayBufferView } = ArrayBuffer;
 export function isArrayBuffer(obj) {
     try {
@@ -28,9 +28,9 @@ export function isUint8Array(obj) {
     }
     return false;
 }
-for (const e of [Map, Set, Date, Array, Error, String, Number, Object, Symbol, Boolean, DataView,
+for (const { prototype } of [Map, Set, Date, Array, Error, String, Number, Object, Symbol, Boolean, DataView,
     Int32Array, Uint8Array, Uint16Array, Uint32Array, ArrayBuffer, Float32Array, Float64Array]) {
-    freeze(e.prototype);
+    seal(prototype);
 }
 const _Function = global.Function;
 export { _Function as Function };

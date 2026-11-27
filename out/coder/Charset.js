@@ -41,7 +41,7 @@ export function decodeUTF8(data) {
         else if ((b1 & 0xe0) === 0xc0)
             out[off++] = fromCharCode(((b1 & 0x1f) << 6) | (data[i++] & 0x3f));
         else if ((b1 & 0xf0) === 0xe0)
-            out[off++] += fromCharCode(((b1 & 0x0f) << 12) | ((data[i++] & 0x3f) << 6) | (data[i++] & 0x3f));
+            out[off++] = fromCharCode(((b1 & 0x0f) << 12) | ((data[i++] & 0x3f) << 6) | (data[i++] & 0x3f));
         else if ((b1 & 0xf8) === 0xf0) {
             const cp = ((b1 & 0x07) << 18) | ((data[i++] & 0x3f) << 12) | ((data[i++] & 0x3f) << 6) | (data[i++] & 0x3f);
             if (cp <= 0x10ffff) {

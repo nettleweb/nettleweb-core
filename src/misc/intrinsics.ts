@@ -54,6 +54,7 @@ export const {
 	values: objValues,
 	entries: objEntries,
 
+	seal,
 	freeze,
 	setPrototypeOf,
 	getPrototypeOf,
@@ -89,7 +90,8 @@ export const {
 export const {
 	apply,
 	ownKeys,
-	construct
+	construct,
+	getOwnPropertyDescriptor
 } = Reflect;
 
 export const {
@@ -113,9 +115,9 @@ export function isUint8Array(obj: any): obj is Uint8Array {
 	return false;
 }
 
-for (const e of [Map, Set, Date, Array, Error, String, Number, Object, Symbol, Boolean, DataView,
+for (const { prototype } of [Map, Set, Date, Array, Error, String, Number, Object, Symbol, Boolean, DataView,
 	Int32Array, Uint8Array, Uint16Array, Uint32Array, ArrayBuffer, Float32Array, Float64Array]) {
-	freeze(e.prototype);
+	seal(prototype);
 }
 
 const _Function = global.Function;
